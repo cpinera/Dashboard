@@ -983,9 +983,15 @@ async function refreshGarmin() {
    RENDER: DAILY NOTES
    ═══════════════════════════════════════════════════════════════ */
 async function loadNotes() {
-  const { items, archive } = await api.loadDailyNotes(state.todayISO);
-  state.notes = items;
-  state.notesArchive = archive;
+  try {
+    const data = await api.loadDailyNotes(state.todayISO);
+    state.notes = Array.isArray(data?.items) ? data.items : [];
+    state.notesArchive = Array.isArray(data?.archive) ? data.archive : [];
+  } catch (e) {
+    console.error('loadNotes error:', e);
+    state.notes = [];
+    state.notesArchive = [];
+  }
   renderNotes();
 }
 function renderNotes() {
