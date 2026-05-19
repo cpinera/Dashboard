@@ -641,10 +641,10 @@ a { color: inherit; text-decoration: none; }
    CONFIG — flip useMockData to false en producción
    ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  useMockData: true,
-  botApiBase: '',     // ej: 'https://tobin-bot.up.railway.app'
-  healthApiBase: '',  // ej: 'https://tobin-health.up.railway.app'
-  apiKey: '',         // header x-api-key si tobin-bot lo requiere
+  useMockData: false,
+  botApiBase: 'https://tobin-bot-production.up.railway.app',
+  healthApiBase: 'https://tobin-health-production.up.railway.app',
+  apiKey: 'tobin2024',
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -714,12 +714,12 @@ const MOCK_DATA = {
 const api = {
   async loadCalendar() {
     if (CONFIG.useMockData) return MOCK_DATA.calendar;
-    const r = await fetch(`${CONFIG.botApiBase}/calendar/today`, { headers: authHeaders() });
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/calendar/today`, { headers: authHeaders() });
     return r.json();
   },
   async createEvent(payload) {
     if (CONFIG.useMockData) { MOCK_DATA.calendar.push({ ...payload, id: 'mock' + Date.now(), hasNote: false }); return; }
-    await fetch(`${CONFIG.botApiBase}/calendar/event`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    await fetch(`${CONFIG.botApiBase}/dashboard/calendar/event`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   },
   async loadTodos(limit = 3, offset = 0) {
     if (CONFIG.useMockData) {
@@ -728,45 +728,45 @@ const api = {
       pendientes.sort((a, b) => orderUrg[a.urgencia] - orderUrg[b.urgencia]);
       return { items: pendientes.slice(offset, offset + limit), total: pendientes.length };
     }
-    const r = await fetch(`${CONFIG.botApiBase}/tasks?limit=${limit}&offset=${offset}`, { headers: authHeaders() });
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/tasks?limit=${limit}&offset=${offset}`, { headers: authHeaders() });
     return r.json();
   },
   async completeTodo(id) {
     if (CONFIG.useMockData) { const t = MOCK_DATA.todos.find(x => x.id === id); if (t) t.estado = 'Completada'; return; }
-    await fetch(`${CONFIG.botApiBase}/tasks/${id}`, { method: 'PATCH', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ estado: 'Completada' }) });
+    await fetch(`${CONFIG.botApiBase}/dashboard/tasks/${id}`, { method: 'PATCH', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ estado: 'Completada' }) });
   },
   async loadHealth() {
     if (CONFIG.useMockData) return MOCK_DATA.health;
-    const r = await fetch(`${CONFIG.healthApiBase}/health/today`);
+    const r = await fetch(`${CONFIG.healthApiBase}/dashboard/health/today`, { headers: authHeaders() });
     return r.json();
   },
   async refreshGarmin() {
     if (CONFIG.useMockData) { await new Promise(r => setTimeout(r, 800)); return MOCK_DATA.health; }
-    const r = await fetch(`${CONFIG.healthApiBase}/garmin/refresh`, { method: 'POST' });
+    const r = await fetch(`${CONFIG.healthApiBase}/dashboard/garmin/refresh`, { method: 'POST', headers: authHeaders() });
     return r.json();
   },
   async refreshWhoop() {
     if (CONFIG.useMockData) { await new Promise(r => setTimeout(r, 800)); return MOCK_DATA.health; }
-    const r = await fetch(`${CONFIG.healthApiBase}/whoop/refresh`, { method: 'POST' });
+    const r = await fetch(`${CONFIG.healthApiBase}/dashboard/whoop/refresh`, { method: 'POST', headers: authHeaders() });
     return r.json();
   },
   async loadDailyNotes(fecha) {
     if (CONFIG.useMockData) return { items: MOCK_DATA.dailyNotes, archive: MOCK_DATA.dailyNotesArchive };
-    const r = await fetch(`${CONFIG.botApiBase}/daily-notes/${fecha}`, { headers: authHeaders() });
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/daily-notes/${fecha}`, { headers: authHeaders() });
     return r.json();
   },
   async saveDailyNotes(fecha, items, archive) {
     if (CONFIG.useMockData) { MOCK_DATA.dailyNotes = items; MOCK_DATA.dailyNotesArchive = archive; return; }
-    await fetch(`${CONFIG.botApiBase}/daily-notes/${fecha}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ items, archive }) });
+    await fetch(`${CONFIG.botApiBase}/dashboard/daily-notes/${fecha}`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ items, archive }) });
   },
   async loadEventNote(eventId) {
     if (CONFIG.useMockData) return MOCK_DATA.eventNotes[eventId] || { prep: '', durante: '' };
-    const r = await fetch(`${CONFIG.botApiBase}/event-notes/${eventId}`, { headers: authHeaders() });
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/event-notes/${eventId}`, { headers: authHeaders() });
     return r.json();
   },
   async saveEventNote(eventId, prep, durante, eventTitle, eventStart) {
     if (CONFIG.useMockData) { MOCK_DATA.eventNotes[eventId] = { prep, durante }; return; }
-    await fetch(`${CONFIG.botApiBase}/event-notes/${eventId}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ prep, durante, event_title: eventTitle, event_start: eventStart }) });
+    await fetch(`${CONFIG.botApiBase}/dashboard/event-notes/${eventId}`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ prep, durante, event_title: eventTitle, event_start: eventStart }) });
   },
   async loadPastNotes(search = '') {
     if (CONFIG.useMockData) {
@@ -775,7 +775,7 @@ const api = {
         !s || n.title.toLowerCase().includes(s) || n.preview.toLowerCase().includes(s) || n.date.includes(s)
       );
     }
-    const r = await fetch(`${CONFIG.botApiBase}/event-notes?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/event-notes?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
     return r.json();
   },
 };
