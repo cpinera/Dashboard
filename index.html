@@ -189,10 +189,19 @@ a { color: inherit; text-decoration: none; }
   background: var(--surface-soft);
   border-radius: var(--radius);
   padding: 14px 16px;
+  border: 1px solid transparent;
+  transition: background 0.2s, border-color 0.2s;
 }
 .metric-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .metric-val { font-size: 26px; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; }
 .metric-sub { font-size: 12px; color: var(--muted2); margin-top: 4px; }
+.metric.zone-green  { background: var(--green-soft); border-color: rgba(22, 163, 74, 0.18); }
+.metric.zone-yellow { background: var(--amber-soft); border-color: rgba(194, 104, 12, 0.22); }
+.metric.zone-red    { background: var(--red-soft);   border-color: rgba(198, 50, 50, 0.22); }
+.metric.zone-green  .metric-val, .metric.zone-green  .metric-sub-strong { color: var(--green-dark); }
+.metric.zone-yellow .metric-val, .metric.zone-yellow .metric-sub-strong { color: var(--amber-dark); }
+.metric.zone-red    .metric-val, .metric.zone-red    .metric-sub-strong { color: var(--red-dark); }
+.metric-sub-strong { font-size: 13px; font-weight: 500; margin-top: 4px; }
 .section-label {
   font-size: 10.5px;
   font-weight: 600;
@@ -211,8 +220,15 @@ a { color: inherit; text-decoration: none; }
 .act-icon { font-size: 20px; color: var(--muted); width: 24px; text-align: center; }
 .act-name { flex: 1; font-weight: 500; }
 .act-name-sub { font-size: 11px; color: var(--muted2); font-weight: 400; margin-left: 2px; }
-.act-vals { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.act-vals { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 8px; }
 .act-vals .sep { margin: 0 7px; color: var(--muted2); }
+.zone-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.zone-dot.zone-green  { background: var(--green); }
+.zone-dot.zone-yellow { background: var(--amber); }
+.zone-dot.zone-red    { background: var(--red); }
+.act-row.zone-green  .act-vals { color: var(--green-dark); font-weight: 500; }
+.act-row.zone-yellow .act-vals { color: var(--amber-dark); font-weight: 500; }
+.act-row.zone-red    .act-vals { color: var(--red-dark); font-weight: 500; }
 
 /* ── Daily notes ──────────────────────────────────────── */
 .notes-area {
@@ -882,19 +898,38 @@ function expandTodos() { state.todosVisible += 3; renderTodos(); }
 /* ═══════════════════════════════════════════════════════════════
    RENDER: HEALTH
    ═══════════════════════════════════════════════════════════════ */
+function recoveryZone(score) {
+  if (score >= 67) return 'green';
+  if (score >= 34) return 'yellow';
+  return 'red';
+}
+function sleepZone(hours, minutes) {
+  const total = hours + (minutes || 0) / 60;
+  if (total >= 6) return 'green';
+  if (total >= 5) return 'yellow';
+  return 'red';
+}
+function gymZone(weeklyCount) {
+  if (weeklyCount >= 3) return 'green';
+  if (weeklyCount === 2) return 'yellow';
+  return 'red';
+}
+
 async function renderHealth() {
   const h = await api.loadHealth();
+  const rZone = recoveryZone(h.recovery || 0);
+  const sZone = sleepZone(h.sleep_hours || 0, h.sleep_minutes || 0);
   const bienestar = document.getElementById('bienestar-block');
   bienestar.innerHTML = `
-    <div class="metric">
+    <div class="metric zone-${rZone}">
       <p class="metric-label">Recovery (Whoop)</p>
       <p class="metric-val">${h.recovery}%</p>
-      <p class="metric-sub">${h.recovery_zone}</p>
+      <p class="metric-sub-strong">${h.recovery_zone}</p>
     </div>
-    <div class="metric">
+    <div class="metric zone-${sZone}">
       <p class="metric-label">Sueño anoche</p>
       <p class="metric-val">${h.sleep_hours}h ${h.sleep_minutes}m</p>
-      <p class="metric-sub">Score ${h.sleep_score}</p>
+      <p class="metric-sub-strong">Score ${h.sleep_score}</p>
     </div>
   `;
   const visible = h.activities.filter(a => a.hoy || a.semana);
@@ -907,11 +942,19 @@ async function renderHealth() {
     const partes = [];
     if (a.hoy) partes.push(`hoy ${a.hoy.val} ${a.hoy.unit}${a.hoy.val !== 1 && a.hoy.unit === 'sesión' ? 'es' : ''}`);
     if (a.semana) partes.push(`7d ${a.semana.val} ${a.semana.unit}${a.semana.val !== 1 && a.semana.unit === 'sesión' ? 'es' : ''}`);
+    let zoneClass = '';
+    let dot = '';
+    if (a.categoria === 'Gym') {
+      const weekly = a.semana?.val || 0;
+      const z = gymZone(weekly);
+      zoneClass = ` zone-${z}`;
+      dot = `<span class="zone-dot zone-${z}" aria-label="zona ${z}"></span>`;
+    }
     return `
-      <div class="act-row">
+      <div class="act-row${zoneClass}">
         <span class="act-icon">${iconFor(a.icon)}</span>
         <span class="act-name">${a.categoria}${a.source ? `<span class="act-name-sub"> (${a.source})</span>` : ''}</span>
-        <span class="act-vals">${partes.join('<span class="sep">·</span>')}</span>
+        <span class="act-vals">${partes.join('<span class="sep">·</span>')}${dot}</span>
       </div>
     `;
   }).join('');
