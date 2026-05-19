@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5f7fa">
+<title>Tobin · Dashboard</title>
+<style>
+:root {
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --border: #e5e9f0;
+  --border-strong: #d1d8e3;
+  --text: #1a2030;
+  --muted: #5e6b85;
+  --muted2: #94a0b8;
+  --blue: #2563eb;
+  --blue-soft: #eff4ff;
+  --blue-dark: #1e40af;
+  --green: #16a34a;
+  --green-soft: #ecfdf5;
+  --green-dark: #15803d;
+  --amber: #c2680c;
+  --amber-soft: #fef6e7;
+  --amber-dark: #92400e;
+  --red: #c63232;
+  --red-soft: #fef1f1;
+  --red-dark: #9b1c1c;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(15, 25, 50, 0.04);
+  --shadow-md: 0 4px 16px rgba(15, 25, 50, 0.08);
+  --shadow-lg: 0 12px 40px rgba(15, 25, 50, 0.14);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: none; }
+a { color: inherit; text-decoration: none; }
+
+.view { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+.view.hidden { display: none; }
+
+/* ── Hero ─────────────────────────────────────────────── */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.hero-greet { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+.hero-date { font-size: 16px; color: var(--muted); text-transform: capitalize; }
+.hero-meta { font-size: 13px; color: var(--muted2); display: inline-flex; align-items: center; gap: 6px; }
+.hero-actions { display: flex; gap: 8px; align-items: center; }
+.linkbtn { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: var(--radius-sm); transition: background 0.15s; }
+.linkbtn:hover { background: rgba(15, 25, 50, 0.05); color: var(--text); }
+
+/* ── Layout ───────────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
+.card-h {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.card-h-icon { font-size: 14px; color: var(--muted2); }
+
+/* ── Buttons ──────────────────────────────────────────── */
+.btn-soft {
+  font-size: 12.5px;
+  padding: 6px 11px;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+.btn-soft:hover { background: var(--surface-soft); color: var(--text); }
+.btn-primary {
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--blue);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-ghost-row {
+  width: 100%;
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 0;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 1px dashed var(--border-strong);
+  transition: color 0.15s;
+}
+.btn-ghost-row:hover { color: var(--blue); }
+.btn-expand {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 0;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  transition: color 0.15s;
+}
+.btn-expand:hover { color: var(--blue); }
+
+/* ── Agenda ───────────────────────────────────────────── */
+.evt { padding: 12px 0; border-top: 1px solid var(--border); }
+.evt:first-of-type { border-top: none; padding-top: 0; }
+.evt-main { display: flex; align-items: center; gap: 14px; font-size: 15px; }
+.evt-time { font-size: 13px; color: var(--muted2); min-width: 48px; font-variant-numeric: tabular-nums; }
+.evt-title { flex: 1; }
+.evt-note-btn {
+  color: var(--muted2);
+  font-size: 17px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.evt-note-btn:hover { color: var(--blue); background: var(--blue-soft); }
+.evt-note-btn.has { color: var(--blue); }
+
+/* ── Todos ────────────────────────────────────────────── */
+.todo {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  font-size: 15px;
+}
+.todo:first-of-type { border-top: none; padding-top: 0; }
+.todo input[type="checkbox"] {
+  width: 18px; height: 18px; flex-shrink: 0;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+.todo.done .todo-text { text-decoration: line-through; color: var(--muted2); }
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  min-width: 42px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.badge-alta { background: var(--red-soft); color: var(--red-dark); }
+.badge-media { background: var(--amber-soft); color: var(--amber-dark); }
+.badge-baja { background: var(--blue-soft); color: var(--blue-dark); }
+.todo-text { flex: 1; }
+
+/* ── Health ───────────────────────────────────────────── */
+.health-refresh { display: flex; gap: 6px; }
+.metrics-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.metric {
+  background: var(--surface-soft);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.metric-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.metric-val { font-size: 26px; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; }
+.metric-sub { font-size: 12px; color: var(--muted2); margin-top: 4px; }
+.section-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin: 6px 0 4px;
+}
+.act-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 0;
+  border-top: 1px solid var(--border);
+  font-size: 14.5px;
+}
+.act-row:first-of-type { border-top: none; padding-top: 8px; }
+.act-icon { font-size: 20px; color: var(--muted); width: 24px; text-align: center; }
+.act-name { flex: 1; font-weight: 500; }
+.act-name-sub { font-size: 11px; color: var(--muted2); font-weight: 400; margin-left: 2px; }
+.act-vals { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.act-vals .sep { margin: 0 7px; color: var(--muted2); }
+
+/* ── Daily notes ──────────────────────────────────────── */
+.notes-area {
+  background: var(--surface-soft);
+  border-radius: var(--radius);
+  padding: 16px;
+  min-height: 140px;
+}
+.note-line { padding: 4px 0; font-size: 15px; }
+.note-check { display: flex; align-items: flex-start; gap: 10px; padding: 4px 0; font-size: 15px; }
+.note-check input { margin-top: 5px; flex-shrink: 0; width: 17px; height: 17px; accent-color: var(--blue); cursor: pointer; }
+.note-check.done span:last-child { text-decoration: line-through; color: var(--muted2); }
+.from-yesterday {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--amber-soft);
+  color: var(--amber-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  vertical-align: 2px;
+}
+.note-add-row { display: flex; gap: 8px; margin-top: 10px; }
+.note-add-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 14px;
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.note-add-input:focus { border-color: var(--blue); }
+.note-row { display: flex; align-items: center; gap: 6px; padding: 1px 0; }
+.note-row > .note-content { flex: 1; min-width: 0; }
+.note-delete {
+  opacity: 0;
+  padding: 4px 6px;
+  font-size: 13px;
+  color: var(--muted2);
+  border-radius: 4px;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.note-row:hover .note-delete { opacity: 0.55; }
+.note-row .note-delete:hover { opacity: 1; color: var(--red); background: var(--red-soft); }
+@media (hover: none) { .note-delete { opacity: 0.4; } }
+.note-longform {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 0;
+  overflow: hidden;
+}
+.note-longform:hover { border-color: var(--blue); background: var(--blue-soft); }
+.note-longform-icon { color: var(--muted); font-size: 15px; flex-shrink: 0; }
+.note-longform-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.note-longform-title { font-weight: 500; font-size: 14.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.note-longform-empty { color: var(--muted2); font-weight: 400; font-style: italic; }
+.note-longform-preview { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.modal-title-input {
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 5px;
+  color: var(--text);
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+.modal-title-input::placeholder { color: var(--muted2); font-weight: 400; }
+.note-archive { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+.archive-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13.5px; color: var(--muted); }
+.archive-row .check-icon { color: var(--green); font-size: 14px; }
+.archive-row .time { font-size: 11.5px; color: var(--muted2); margin-left: 4px; }
+.autosave { font-size: 12px; color: var(--muted2); display: inline-flex; align-items: center; gap: 4px; }
+
+/* ── Modal ────────────────────────────────────────────── */
+.modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 60px 20px; overflow-y: auto; }
+.modal.open { display: flex; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15, 25, 50, 0.42); backdrop-filter: blur(2px); }
+.modal-card {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 560px;
+  padding: 22px 26px 18px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.modal-title { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 5px; }
+.modal-meta { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.modal-close { font-size: 20px; color: var(--muted2); padding: 4px; line-height: 1; transition: color 0.15s; }
+.modal-close:hover { color: var(--text); }
+.modal-body { border-top: 1px solid var(--border); padding-top: 14px; min-height: 260px; }
+.section-mini {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin: 0 0 6px;
+}
+.modal-textarea {
+  width: 100%;
+  min-height: 90px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-size: 14.5px;
+  line-height: 1.65;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  margin-bottom: 14px;
+}
+.modal-textarea::placeholder { color: var(--muted2); font-style: italic; }
+.modal-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12.5px; flex-wrap: wrap; }
+
+/* ── Add event modal ──────────────────────────────────── */
+.field { display: block; margin-bottom: 14px; }
+.field-label { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block; font-weight: 500; }
+.field-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field-input:focus { border-color: var(--blue); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── Past notes view ──────────────────────────────────── */
+.back-btn {
+  font-size: 13px; color: var(--muted);
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 10px; border-radius: var(--radius-sm); margin-bottom: 16px;
+  transition: all 0.15s;
+}
+.back-btn:hover { background: var(--surface-soft); color: var(--text); }
+.pn-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
+.pn-title { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; display: inline-flex; align-items: center; gap: 10px; }
+.pn-count { font-size: 13px; color: var(--muted2); }
+.search-wrap { position: relative; margin-bottom: 24px; }
+.search-input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14.5px;
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--blue); }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted2); font-size: 16px; pointer-events: none; }
+.pn-group {
+  font-size: 11px; font-weight: 600;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 18px 0 8px;
+}
+.pn-group:first-of-type { margin-top: 0; }
+.pn-row {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
+  padding: 14px 4px;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.pn-row:hover { background: var(--surface-soft); }
+.pn-row-content { min-width: 0; flex: 1; }
+.pn-row-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.pn-row-preview { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+.pn-row-date { font-size: 12.5px; color: var(--muted2); white-space: nowrap; font-variant-numeric: tabular-nums; padding-top: 2px; }
+.pn-empty { padding: 40px 0; text-align: center; color: var(--muted2); font-size: 14px; }
+
+/* ── Icons (inline SVG names) ─────────────────────────── */
+.ic { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; }
+</style>
+</head>
+<body>
+
+<main id="dashboard-view" class="view">
+
+  <div class="hero">
+    <div>
+      <h1 class="hero-greet" id="hero-greet">Buenos días, Cristobal</h1>
+      <p class="hero-date" id="hero-date">—</p>
+    </div>
+    <div class="hero-actions">
+      <button class="linkbtn" id="open-past-notes">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        <span>Notas pasadas</span>
+      </button>
+      <span class="hero-meta">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span id="hero-clock">—</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <section class="card" id="agenda-card">
+      <div class="card-head">
+        <span class="card-h">
+          <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Agenda de hoy
+        </span>
+        <button class="btn-soft" id="btn-add-event">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar
+        </button>
+      </div>
+      <div id="agenda-list"></div>
+      <button class="btn-ghost-row" onclick="openAddEventModal()">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Agregar evento al calendario
+      </button>
+    </section>
+
+    <section class="card" id="todos-card">
+      <div class="card-head">
+        <span class="card-h">
+          <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Top to-dos
+        </span>
+        <span style="font-size: 11px; color: var(--muted2);" id="todos-count">—</span>
+      </div>
+      <div id="todos-list"></div>
+      <button class="btn-expand" id="btn-expand-todos">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        <span id="expand-label">Ver 3 más</span>
+      </button>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-head">
+      <span class="card-h">
+        <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Salud
+      </span>
+      <div class="health-refresh">
+        <button class="btn-soft" id="btn-refresh-whoop">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 14.66-7"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-14.66 7"/><path d="M3 20v-5h5"/></svg>
+          Whoop
+        </button>
+        <button class="btn-soft" id="btn-refresh-garmin">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 14.66-7"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-14.66 7"/><path d="M3 20v-5h5"/></svg>
+          Garmin
+        </button>
+      </div>
+    </div>
+
+    <div class="metrics-2" id="bienestar-block"></div>
+
+    <p class="section-label">Actividad</p>
+    <div id="actividad-list"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <span class="card-h">
+        <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        Notas del día
+      </span>
+      <span class="autosave" id="notes-autosave">—</span>
+    </div>
+    <div class="notes-area">
+      <div id="notes-list"></div>
+      <div class="note-add-row">
+        <input type="text" class="note-add-input" id="note-add-input" placeholder="Agregar nota o '+ check' para checklist…">
+        <button class="btn-soft" id="btn-add-longform" title="Crear nota larga con título">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          Nota larga
+        </button>
+      </div>
+      <div class="note-archive" id="note-archive" style="display: none;">
+        <p class="section-label" style="margin-top: 0; margin-bottom: 8px;">Completadas hoy</p>
+        <div id="note-archive-list"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<main id="past-notes-view" class="view hidden">
+  <button class="back-btn" id="back-to-dashboard">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Volver al dashboard
+  </button>
+  <div class="pn-head">
+    <h2 class="pn-title">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+      Notas de reuniones
+    </h2>
+    <span class="pn-count" id="pn-count">— notas</span>
+  </div>
+  <div class="search-wrap">
+    <input type="search" class="search-input" id="pn-search" placeholder="Buscar por reunión, fecha o contenido…">
+    <svg class="ic search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+  </div>
+  <div id="pn-list"></div>
+</main>
+
+<!-- Event note modal -->
+<div class="modal" id="event-note-modal">
+  <div class="modal-backdrop" onclick="closeEventNoteModal()"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h2 class="modal-title" id="modal-event-title">—</h2>
+        <p class="modal-meta">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span id="modal-event-meta">—</span>
+        </p>
+      </div>
+      <button class="modal-close" onclick="closeEventNoteModal()" aria-label="Cerrar">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="section-mini">Preparación</p>
+      <textarea class="modal-textarea" id="modal-prep" placeholder="Notas para preparar la reunión…"></textarea>
+      <p class="section-mini">Durante la reunión</p>
+      <textarea class="modal-textarea" id="modal-during" placeholder="Empieza a escribir cuando arranque el call…"></textarea>
+    </div>
+    <div class="modal-foot">
+      <span class="autosave" id="modal-autosave">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Guardado
+      </span>
+      <button class="linkbtn" onclick="showPastNotesView()">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        Ver notas pasadas
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Longform note modal -->
+<div class="modal" id="longform-note-modal">
+  <div class="modal-backdrop" onclick="closeLongformNoteModal()"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div style="flex: 1; min-width: 0;">
+        <input type="text" class="modal-title-input" id="modal-longform-title" placeholder="Título de la nota">
+        <p class="modal-meta" id="modal-longform-meta">—</p>
+      </div>
+      <button class="modal-close" onclick="closeLongformNoteModal()" aria-label="Cerrar">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <textarea class="modal-textarea" id="modal-longform-body" placeholder="Empieza a escribir…" style="min-height: 280px;"></textarea>
+    </div>
+    <div class="modal-foot">
+      <span class="autosave" id="modal-longform-autosave">Sin cambios</span>
+      <button class="linkbtn" id="btn-delete-longform" style="color: var(--red);">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M5 6l1 14h12l1-14"/></svg>
+        Borrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add event modal -->
+<div class="modal" id="add-event-modal">
+  <div class="modal-backdrop" onclick="closeAddEventModal()"></div>
+  <div class="modal-card" style="max-width: 480px;">
+    <div class="modal-head">
+      <h2 class="modal-title">Nuevo evento en Google Calendar</h2>
+      <button class="modal-close" onclick="closeAddEventModal()" aria-label="Cerrar">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="min-height: auto;">
+      <div class="field">
+        <label class="field-label">Título</label>
+        <input type="text" class="field-input" id="ev-title" placeholder="Ej: Call con Acme">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Inicio</label>
+          <input type="time" class="field-input" id="ev-start" value="10:00">
+        </div>
+        <div class="field">
+          <label class="field-label">Fin</label>
+          <input type="time" class="field-input" id="ev-end" value="10:30">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Descripción (opcional)</label>
+        <input type="text" class="field-input" id="ev-desc" placeholder="">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span></span>
+      <button class="btn-primary" onclick="createEvent()">Crear evento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   CONFIG — flip useMockData to false en producción
+   ═══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  useMockData: true,
+  botApiBase: '',     // ej: 'https://tobin-bot.up.railway.app'
+  healthApiBase: '',  // ej: 'https://tobin-health.up.railway.app'
+  apiKey: '',         // header x-api-key si tobin-bot lo requiere
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MOCK DATA — se reemplaza por las llamadas reales
+   ═══════════════════════════════════════════════════════════════ */
+const MOCK_DATA = {
+  calendar: [
+    { id: 'ev1', start: '09:30', end: '10:15', title: 'Reunión equipo Tantauco', hasNote: false },
+    { id: 'ev2', start: '11:00', end: '11:45', title: 'Call con Acme (dealflow)', hasNote: true },
+    { id: 'ev3', start: '14:00', end: '15:00', title: 'Almuerzo con Felipe', hasNote: false },
+    { id: 'ev4', start: '16:30', end: '17:30', title: 'Revisión semanal pipeline', hasNote: true },
+  ],
+  todos: [
+    { id: 1, nombre: 'Cerrar memo de inversión a Acme', urgencia: 'Alta', estado: 'Pendiente' },
+    { id: 2, nombre: 'Responder a LPs sobre Q1', urgencia: 'Alta', estado: 'Pendiente' },
+    { id: 3, nombre: 'Coordinar viaje a SF de junio', urgencia: 'Media', estado: 'Pendiente' },
+    { id: 4, nombre: 'Revisar presupuesto Q2', urgencia: 'Media', estado: 'Pendiente' },
+    { id: 5, nombre: 'Llamar a Juan por tema legal', urgencia: 'Media', estado: 'Pendiente' },
+    { id: 6, nombre: 'Actualizar dashboard de KPIs', urgencia: 'Baja', estado: 'Pendiente' },
+    { id: 7, nombre: 'Agendar dentista', urgencia: 'Baja', estado: 'Pendiente' },
+    { id: 8, nombre: 'Revisar PR de tobin-bot', urgencia: 'Baja', estado: 'Pendiente' },
+    { id: 9, nombre: 'Mandar follow-up a Tropic Ventures', urgencia: 'Media', estado: 'Pendiente' },
+    { id: 10, nombre: 'Pagar cuentas pendientes', urgencia: 'Baja', estado: 'Pendiente' },
+    { id: 11, nombre: 'Comprar regalos cumpleaños Maca', urgencia: 'Media', estado: 'Pendiente' },
+    { id: 12, nombre: 'Llamar a fondo X', urgencia: 'Baja', estado: 'Pendiente' },
+  ],
+  health: {
+    recovery: 78,
+    sleep_hours: 7, sleep_minutes: 23, sleep_score: 89,
+    recovery_zone: 'Zona verde',
+    activities: [
+      { categoria: 'Trote',  icon: 'run',  hoy: { unit: 'km', val: 6.5 }, semana: { unit: 'km', val: 28.4 } },
+      { categoria: 'Bici',   icon: 'bike', hoy: null,                     semana: { unit: 'km', val: 42 } },
+      { categoria: 'Nado',   icon: 'swim', hoy: null,                     semana: null },
+      { categoria: 'Gym',    icon: 'gym',  hoy: { unit: 'sesión', val: 1 }, semana: { unit: 'sesión', val: 4 }, source: 'Whoop' },
+    ],
+  },
+  dailyNotes: [
+    { id: 'n1', tipo: 'texto', texto: 'Preparar pitch para reunión Tantauco', creado_en_fecha: '2026-05-18' },
+    { id: 'n2', tipo: 'check', texto: 'Revisar memo Acme antes de las 11', completado: false, creado_en_fecha: '2026-05-17' },
+    { id: 'n3', tipo: 'check', texto: 'Mandar follow-up a 3 fondos LP', completado: false, creado_en_fecha: '2026-05-18' },
+    { id: 'n4', tipo: 'check', texto: 'Llamar a Maca por tema viaje', completado: false, creado_en_fecha: '2026-05-16' },
+    { id: 'n5', tipo: 'longform', titulo: 'Resumen Q1 Tantauco', cuerpo: 'Cerramos Q1 con 4 nuevas inversiones (Acme, Beta, Tropic y Delta).\n\nKey points:\n- Acme: deal cerrado en abril, $500k a 5% equity\n- Beta: en due diligence final, esperamos cerrar mayo\n- Tropic: pendiente segunda call, co-invest con Felipe\n- Delta: pasamos, no convenció el equipo\n\nNext steps Q2:\n- Cerrar Beta\n- Pipeline review semanal con el equipo\n- Preparar comité mayo con LPs', creado_en_fecha: '2026-05-18' },
+  ],
+  dailyNotesArchive: [
+    { id: 'a1', texto: 'Revisar mails', completado_at: '08:32' },
+    { id: 'a2', texto: 'Llamar a banco', completado_at: '09:05' },
+  ],
+  eventNotes: {
+    ev2: { prep: '· Revisar último deck que mandaron en abril\n· Pregunta clave: cuánto runway tienen\n· Confirmar si Felipe se suma al call', durante: '' },
+    ev4: { prep: '· Cerrar lista de empresas para Q3\n· Decidir qué memos priorizar', durante: '' },
+  },
+  pastNotes: [
+    { event_id: 'p1', title: 'Revisión semanal pipeline', date: '2026-05-15', preview: 'Cerrar lista de empresas Q3 · decidir qué memos priorizar · siguiente: hablar con Vale', prep: '', durante: '' },
+    { event_id: 'p2', title: 'Call con Tropic Ventures', date: '2026-05-14', preview: 'Co-invest oportunidad ronda seed de Beta · pidieron 200k · pending check size definitivo', prep: '', durante: '' },
+    { event_id: 'p3', title: 'Reunión equipo Tantauco', date: '2026-05-12', preview: 'Roadmap H2 · Felipe lidera memo Acme · Maca toma Tropic · revisar legal antes del 25', prep: '', durante: '' },
+    { event_id: 'p4', title: 'Almuerzo con Felipe', date: '2026-05-08', preview: 'Conversamos estrategia fondo · él propone abrir SF Q3 · pendiente revisar costos', prep: '', durante: '' },
+    { event_id: 'p5', title: 'Pitch a LPs (Comité Mayo)', date: '2026-05-07', preview: 'Presentamos performance Q1 · 3 nuevos LPs interesados · seguimiento con Patricia y Luis', prep: '', durante: '' },
+    { event_id: 'p6', title: 'Call con startup Beta', date: '2026-04-28', preview: 'Demo del producto · CEO sólido · pendiente conversar con CTO y revisar churn', prep: '', durante: '' },
+    { event_id: 'p7', title: 'Reunión equipo Tantauco', date: '2026-04-22', preview: 'Quarterly review · cerramos Q1 con 4 nuevas inversiones · planificación H2', prep: '', durante: '' },
+  ],
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA LAYER — funciones que envuelven mock o fetch real
+   ═══════════════════════════════════════════════════════════════ */
+const api = {
+  async loadCalendar() {
+    if (CONFIG.useMockData) return MOCK_DATA.calendar;
+    const r = await fetch(`${CONFIG.botApiBase}/calendar/today`, { headers: authHeaders() });
+    return r.json();
+  },
+  async createEvent(payload) {
+    if (CONFIG.useMockData) { MOCK_DATA.calendar.push({ ...payload, id: 'mock' + Date.now(), hasNote: false }); return; }
+    await fetch(`${CONFIG.botApiBase}/calendar/event`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  },
+  async loadTodos(limit = 3, offset = 0) {
+    if (CONFIG.useMockData) {
+      const pendientes = MOCK_DATA.todos.filter(t => t.estado === 'Pendiente');
+      const orderUrg = { 'Alta': 0, 'Media': 1, 'Baja': 2 };
+      pendientes.sort((a, b) => orderUrg[a.urgencia] - orderUrg[b.urgencia]);
+      return { items: pendientes.slice(offset, offset + limit), total: pendientes.length };
+    }
+    const r = await fetch(`${CONFIG.botApiBase}/tasks?limit=${limit}&offset=${offset}`, { headers: authHeaders() });
+    return r.json();
+  },
+  async completeTodo(id) {
+    if (CONFIG.useMockData) { const t = MOCK_DATA.todos.find(x => x.id === id); if (t) t.estado = 'Completada'; return; }
+    await fetch(`${CONFIG.botApiBase}/tasks/${id}`, { method: 'PATCH', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ estado: 'Completada' }) });
+  },
+  async loadHealth() {
+    if (CONFIG.useMockData) return MOCK_DATA.health;
+    const r = await fetch(`${CONFIG.healthApiBase}/health/today`);
+    return r.json();
+  },
+  async refreshGarmin() {
+    if (CONFIG.useMockData) { await new Promise(r => setTimeout(r, 800)); return MOCK_DATA.health; }
+    const r = await fetch(`${CONFIG.healthApiBase}/garmin/refresh`, { method: 'POST' });
+    return r.json();
+  },
+  async refreshWhoop() {
+    if (CONFIG.useMockData) { await new Promise(r => setTimeout(r, 800)); return MOCK_DATA.health; }
+    const r = await fetch(`${CONFIG.healthApiBase}/whoop/refresh`, { method: 'POST' });
+    return r.json();
+  },
+  async loadDailyNotes(fecha) {
+    if (CONFIG.useMockData) return { items: MOCK_DATA.dailyNotes, archive: MOCK_DATA.dailyNotesArchive };
+    const r = await fetch(`${CONFIG.botApiBase}/daily-notes/${fecha}`, { headers: authHeaders() });
+    return r.json();
+  },
+  async saveDailyNotes(fecha, items, archive) {
+    if (CONFIG.useMockData) { MOCK_DATA.dailyNotes = items; MOCK_DATA.dailyNotesArchive = archive; return; }
+    await fetch(`${CONFIG.botApiBase}/daily-notes/${fecha}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ items, archive }) });
+  },
+  async loadEventNote(eventId) {
+    if (CONFIG.useMockData) return MOCK_DATA.eventNotes[eventId] || { prep: '', durante: '' };
+    const r = await fetch(`${CONFIG.botApiBase}/event-notes/${eventId}`, { headers: authHeaders() });
+    return r.json();
+  },
+  async saveEventNote(eventId, prep, durante, eventTitle, eventStart) {
+    if (CONFIG.useMockData) { MOCK_DATA.eventNotes[eventId] = { prep, durante }; return; }
+    await fetch(`${CONFIG.botApiBase}/event-notes/${eventId}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ prep, durante, event_title: eventTitle, event_start: eventStart }) });
+  },
+  async loadPastNotes(search = '') {
+    if (CONFIG.useMockData) {
+      const s = search.toLowerCase();
+      return MOCK_DATA.pastNotes.filter(n =>
+        !s || n.title.toLowerCase().includes(s) || n.preview.toLowerCase().includes(s) || n.date.includes(s)
+      );
+    }
+    const r = await fetch(`${CONFIG.botApiBase}/event-notes?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
+    return r.json();
+  },
+};
+function authHeaders() { return CONFIG.apiKey ? { 'x-api-key': CONFIG.apiKey } : {}; }
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const SHORT_DAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+const SHORT_MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+function todayISO() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function formatFullDate(d) { return `${DAYS[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]} de ${d.getFullYear()}`; }
+function formatShortDate(iso) { const d = new Date(iso + 'T00:00:00'); const today = new Date(); const sameMonth = d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); return sameMonth ? `${SHORT_DAYS[d.getDay()]} ${d.getDate()}` : `${d.getDate()} ${SHORT_MONTHS[d.getMonth()]}`; }
+function formatClock(d) { return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); }
+function daysBetween(isoOld, isoNew) { const a = new Date(isoOld + 'T00:00:00'); const b = new Date(isoNew + 'T00:00:00'); return Math.round((b - a) / (1000 * 60 * 60 * 24)); }
+function debounce(fn, ms) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; }
+function uid() { return 'i' + Math.random().toString(36).slice(2, 9); }
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+const state = {
+  todayISO: todayISO(),
+  todosVisible: 3,
+  todosTotal: 0,
+  notes: [],
+  notesArchive: [],
+  modalEventId: null,
+  modalEventTitle: null,
+  modalEventStart: null,
+  currentLongformId: null,
+  todayEvents: [],
+  pastNotesCache: [],
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: HERO
+   ═══════════════════════════════════════════════════════════════ */
+function renderHero() {
+  const now = new Date();
+  document.getElementById('hero-date').textContent = formatFullDate(now);
+  document.getElementById('hero-clock').textContent = 'Actualizado ' + formatClock(now);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: AGENDA
+   ═══════════════════════════════════════════════════════════════ */
+async function renderAgenda() {
+  const events = await api.loadCalendar();
+  state.todayEvents = events;
+  const el = document.getElementById('agenda-list');
+  if (events.length === 0) {
+    el.innerHTML = '<p style="color: var(--muted2); font-size: 14px; padding: 8px 0;">Sin eventos hoy</p>';
+    return;
+  }
+  el.innerHTML = events.map(ev => `
+    <div class="evt">
+      <div class="evt-main">
+        <span class="evt-time">${ev.start}</span>
+        <span class="evt-title">${escapeHtml(ev.title)}</span>
+        <button class="evt-note-btn ${ev.hasNote ? 'has' : ''}" data-event-id="${escapeAttr(ev.id)}" aria-label="Nota">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.evt-note-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ev = state.todayEvents.find(e => e.id === btn.dataset.eventId);
+      if (ev) openEventNoteModal(ev.id, ev.title, ev.start, ev.end || '');
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: TODOS
+   ═══════════════════════════════════════════════════════════════ */
+async function renderTodos() {
+  const { items, total } = await api.loadTodos(state.todosVisible, 0);
+  state.todosTotal = total;
+  document.getElementById('todos-count').textContent = `${items.length} de ${total}`;
+  const el = document.getElementById('todos-list');
+  el.innerHTML = items.map(t => `
+    <div class="todo">
+      <input type="checkbox" onchange="completeTodo(${t.id})" aria-label="Completar">
+      <span class="badge badge-${t.urgencia.toLowerCase()}">${t.urgencia}</span>
+      <span class="todo-text">${escapeHtml(t.nombre)}</span>
+    </div>
+  `).join('');
+  const expandBtn = document.getElementById('btn-expand-todos');
+  const remaining = total - items.length;
+  if (remaining <= 0) { expandBtn.style.display = 'none'; }
+  else { expandBtn.style.display = 'flex'; document.getElementById('expand-label').textContent = `Ver ${Math.min(3, remaining)} más`; }
+}
+async function completeTodo(id) {
+  await api.completeTodo(id);
+  await renderTodos();
+}
+function expandTodos() { state.todosVisible += 3; renderTodos(); }
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: HEALTH
+   ═══════════════════════════════════════════════════════════════ */
+async function renderHealth() {
+  const h = await api.loadHealth();
+  const bienestar = document.getElementById('bienestar-block');
+  bienestar.innerHTML = `
+    <div class="metric">
+      <p class="metric-label">Recovery (Whoop)</p>
+      <p class="metric-val">${h.recovery}%</p>
+      <p class="metric-sub">${h.recovery_zone}</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Sueño anoche</p>
+      <p class="metric-val">${h.sleep_hours}h ${h.sleep_minutes}m</p>
+      <p class="metric-sub">Score ${h.sleep_score}</p>
+    </div>
+  `;
+  const visible = h.activities.filter(a => a.hoy || a.semana);
+  const act = document.getElementById('actividad-list');
+  if (visible.length === 0) {
+    act.innerHTML = '<p style="color: var(--muted2); font-size: 13px; padding: 10px 0;">Sin actividad registrada</p>';
+    return;
+  }
+  act.innerHTML = visible.map(a => {
+    const partes = [];
+    if (a.hoy) partes.push(`hoy ${a.hoy.val} ${a.hoy.unit}${a.hoy.val !== 1 && a.hoy.unit === 'sesión' ? 'es' : ''}`);
+    if (a.semana) partes.push(`7d ${a.semana.val} ${a.semana.unit}${a.semana.val !== 1 && a.semana.unit === 'sesión' ? 'es' : ''}`);
+    return `
+      <div class="act-row">
+        <span class="act-icon">${iconFor(a.icon)}</span>
+        <span class="act-name">${a.categoria}${a.source ? `<span class="act-name-sub"> (${a.source})</span>` : ''}</span>
+        <span class="act-vals">${partes.join('<span class="sep">·</span>')}</span>
+      </div>
+    `;
+  }).join('');
+}
+function iconFor(name) {
+  const icons = {
+    run: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M5 22l5-10 4 3 4-6"/><path d="M9 7l3 2 3-1"/></svg>',
+    bike: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="17" r="4"/><circle cx="18" cy="17" r="4"/><path d="M6 17l4-9h5l3 9M10 8h4"/></svg>',
+    swim: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1 2-1 4-1"/><path d="M2 14c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1 2-1 4-1"/><circle cx="17" cy="7" r="2"/></svg>',
+    gym: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6v12M18 6v12M3 9v6M21 9v6M6 12h12"/></svg>',
+  };
+  return icons[name] || icons.run;
+}
+async function refreshWhoop() {
+  const btn = document.getElementById('btn-refresh-whoop'); btn.style.opacity = '0.5'; btn.disabled = true;
+  await api.refreshWhoop(); await renderHealth();
+  btn.style.opacity = ''; btn.disabled = false;
+}
+async function refreshGarmin() {
+  const btn = document.getElementById('btn-refresh-garmin'); btn.style.opacity = '0.5'; btn.disabled = true;
+  await api.refreshGarmin(); await renderHealth();
+  btn.style.opacity = ''; btn.disabled = false;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: DAILY NOTES
+   ═══════════════════════════════════════════════════════════════ */
+async function loadNotes() {
+  const { items, archive } = await api.loadDailyNotes(state.todayISO);
+  state.notes = items;
+  state.notesArchive = archive;
+  renderNotes();
+}
+function renderNotes() {
+  const el = document.getElementById('notes-list');
+  const delIcon = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+  const longformIcon = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H10M16 17H10"/></svg>`;
+  el.innerHTML = state.notes.map(n => {
+    const days = n.creado_en_fecha ? daysBetween(n.creado_en_fecha, state.todayISO) : 0;
+    const carryBadge = days >= 1
+      ? `<span class="from-yesterday"><svg class="ic" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>${days === 1 ? 'viene de ayer' : days + ' días'}</span>`
+      : '';
+    let content;
+    if (n.tipo === 'longform') {
+      const titleHtml = n.titulo ? escapeHtml(n.titulo) : '<span class="note-longform-empty">Sin título</span>';
+      const previewText = (n.cuerpo || '').replace(/\s+/g, ' ').trim();
+      const previewHtml = previewText ? `<span class="note-longform-preview">${escapeHtml(previewText)}</span>` : '';
+      content = `<div class="note-longform" data-longform-id="${escapeAttr(n.id)}"><span class="note-longform-icon">${longformIcon}</span><div class="note-longform-body"><span class="note-longform-title">${titleHtml}</span>${previewHtml}</div></div>`;
+    } else if (n.tipo === 'check') {
+      content = `<div class="note-check ${n.completado ? 'done' : ''}"><input type="checkbox" ${n.completado ? 'checked' : ''} data-toggle-id="${escapeAttr(n.id)}"><span>${escapeHtml(n.texto)}${!n.completado ? carryBadge : ''}</span></div>`;
+    } else {
+      content = `<div class="note-line">${escapeHtml(n.texto)}${carryBadge}</div>`;
+    }
+    return `<div class="note-row"><div class="note-content">${content}</div><button class="note-delete" data-delete-id="${escapeAttr(n.id)}" aria-label="Borrar nota">${delIcon}</button></div>`;
+  }).join('');
+  el.querySelectorAll('[data-toggle-id]').forEach(input => {
+    input.addEventListener('change', () => toggleNote(input.dataset.toggleId));
+  });
+  el.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); deleteNote(btn.dataset.deleteId); });
+  });
+  el.querySelectorAll('[data-longform-id]').forEach(row => {
+    row.addEventListener('click', () => openLongformNoteModal(row.dataset.longformId));
+  });
+  // archive
+  const archEl = document.getElementById('note-archive');
+  const archList = document.getElementById('note-archive-list');
+  if (state.notesArchive.length > 0) {
+    archEl.style.display = 'block';
+    archList.innerHTML = state.notesArchive.map(a => `
+      <div class="archive-row">
+        <span class="check-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <span>${escapeHtml(a.texto)}<span class="time">— completada ${a.completado_at}</span></span>
+      </div>
+    `).join('');
+  } else {
+    archEl.style.display = 'none';
+  }
+}
+function deleteNote(id) {
+  state.notes = state.notes.filter(n => n.id !== id);
+  renderNotes();
+  saveNotesDebounced();
+}
+function toggleNote(id) {
+  const n = state.notes.find(x => x.id === id);
+  if (!n) return;
+  n.completado = !n.completado;
+  if (n.completado) {
+    state.notes = state.notes.filter(x => x.id !== id);
+    state.notesArchive.push({ id, texto: n.texto, completado_at: formatClock(new Date()) });
+  }
+  renderNotes();
+  saveNotesDebounced();
+}
+function addNote(text) {
+  const isCheck = text.trim().toLowerCase().startsWith('+ check') || text.trim().startsWith('- [ ]');
+  const clean = text.replace(/^(\+ ?check |- \[ \] )/i, '').trim();
+  if (!clean) return;
+  const note = { id: uid(), tipo: isCheck ? 'check' : 'texto', texto: clean, completado: false, creado_en_fecha: state.todayISO };
+  state.notes.push(note);
+  renderNotes();
+  saveNotesDebounced();
+}
+const saveNotesDebounced = debounce(async () => {
+  await api.saveDailyNotes(state.todayISO, state.notes, state.notesArchive);
+  document.getElementById('notes-autosave').innerHTML = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Guardado · ${formatClock(new Date())}`;
+}, 600);
+
+/* ═══════════════════════════════════════════════════════════════
+   LONGFORM NOTE MODAL
+   ═══════════════════════════════════════════════════════════════ */
+function openLongformNoteModal(noteId) {
+  const n = state.notes.find(x => x.id === noteId);
+  if (!n) return;
+  state.currentLongformId = noteId;
+  document.getElementById('modal-longform-title').value = n.titulo || '';
+  document.getElementById('modal-longform-body').value = n.cuerpo || '';
+  document.getElementById('modal-longform-meta').textContent = `Nota del ${formatFullDate(new Date(n.creado_en_fecha + 'T00:00:00'))}`;
+  document.getElementById('modal-longform-autosave').innerHTML = (n.titulo || n.cuerpo) ? `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Guardado` : 'Sin cambios';
+  document.getElementById('longform-note-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    const titleEl = document.getElementById('modal-longform-title');
+    if (!n.titulo) titleEl.focus();
+    else document.getElementById('modal-longform-body').focus();
+  }, 60);
+}
+function closeLongformNoteModal() {
+  document.getElementById('longform-note-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  state.currentLongformId = null;
+  renderNotes();
+}
+const saveLongformDebounced = debounce(() => {
+  if (!state.currentLongformId) return;
+  const n = state.notes.find(x => x.id === state.currentLongformId);
+  if (!n) return;
+  n.titulo = document.getElementById('modal-longform-title').value;
+  n.cuerpo = document.getElementById('modal-longform-body').value;
+  document.getElementById('modal-longform-autosave').innerHTML = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Guardado · ${formatClock(new Date())}`;
+  saveNotesDebounced();
+}, 400);
+function createLongformNote() {
+  const note = { id: uid(), tipo: 'longform', titulo: '', cuerpo: '', creado_en_fecha: state.todayISO };
+  state.notes.push(note);
+  renderNotes();
+  openLongformNoteModal(note.id);
+  saveNotesDebounced();
+}
+function deleteCurrentLongform() {
+  if (!state.currentLongformId) return;
+  if (!confirm('¿Borrar esta nota? Esta acción no se puede deshacer.')) return;
+  const id = state.currentLongformId;
+  closeLongformNoteModal();
+  state.notes = state.notes.filter(n => n.id !== id);
+  renderNotes();
+  saveNotesDebounced();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EVENT NOTE MODAL
+   ═══════════════════════════════════════════════════════════════ */
+async function openEventNoteModal(eventId, title, start, end) {
+  state.modalEventId = eventId;
+  state.modalEventTitle = title;
+  state.modalEventStart = start;
+  document.getElementById('modal-event-title').textContent = title;
+  document.getElementById('modal-event-meta').textContent = `${formatFullDate(new Date())} · ${start}${end ? ' – ' + end : ''}`;
+  const note = await api.loadEventNote(eventId);
+  document.getElementById('modal-prep').value = note.prep || '';
+  document.getElementById('modal-during').value = note.durante || '';
+  document.getElementById('modal-autosave').innerHTML = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> ${note.prep || note.durante ? 'Guardado' : 'Sin cambios'}`;
+  document.getElementById('event-note-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeEventNoteModal() {
+  document.getElementById('event-note-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  // refresh agenda para actualizar icono 'has note'
+  renderAgenda();
+}
+const saveEventNoteDebounced = debounce(async () => {
+  const prep = document.getElementById('modal-prep').value;
+  const durante = document.getElementById('modal-during').value;
+  if (!state.modalEventId) return;
+  await api.saveEventNote(state.modalEventId, prep, durante, state.modalEventTitle, state.modalEventStart);
+  // marcar evento como has-note en mock
+  if (CONFIG.useMockData) {
+    const ev = MOCK_DATA.calendar.find(e => e.id === state.modalEventId);
+    if (ev) ev.hasNote = !!(prep.trim() || durante.trim());
+  }
+  document.getElementById('modal-autosave').innerHTML = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Guardado · hace 0 seg`;
+}, 700);
+
+/* ═══════════════════════════════════════════════════════════════
+   ADD EVENT MODAL
+   ═══════════════════════════════════════════════════════════════ */
+function openAddEventModal() {
+  document.getElementById('ev-title').value = '';
+  document.getElementById('ev-desc').value = '';
+  document.getElementById('add-event-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('ev-title').focus(), 50);
+}
+function closeAddEventModal() {
+  document.getElementById('add-event-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+async function createEvent() {
+  const title = document.getElementById('ev-title').value.trim();
+  const start = document.getElementById('ev-start').value;
+  const end = document.getElementById('ev-end').value;
+  const desc = document.getElementById('ev-desc').value.trim();
+  if (!title) { alert('Falta el título'); return; }
+  await api.createEvent({ title, start, end, descripcion: desc });
+  closeAddEventModal();
+  await renderAgenda();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAST NOTES VIEW
+   ═══════════════════════════════════════════════════════════════ */
+async function showPastNotesView() {
+  closeEventNoteModal();
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('past-notes-view').classList.remove('hidden');
+  window.scrollTo(0, 0);
+  await renderPastNotes();
+}
+function showDashboardView() {
+  document.getElementById('past-notes-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+async function renderPastNotes() {
+  const search = document.getElementById('pn-search').value;
+  const notes = await api.loadPastNotes(search);
+  document.getElementById('pn-count').textContent = `${notes.length} nota${notes.length === 1 ? '' : 's'}`;
+  const el = document.getElementById('pn-list');
+  if (notes.length === 0) { el.innerHTML = '<p class="pn-empty">No hay notas que coincidan</p>'; return; }
+  // group by month
+  const groups = {};
+  notes.forEach(n => {
+    const d = new Date(n.date + 'T00:00:00');
+    const key = `${MONTHS[d.getMonth()].charAt(0).toUpperCase() + MONTHS[d.getMonth()].slice(1)} ${d.getFullYear()}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(n);
+  });
+  state.pastNotesCache = notes;
+  el.innerHTML = Object.entries(groups).map(([month, items]) => `
+    <p class="pn-group">${month}</p>
+    ${items.map(n => `
+      <div class="pn-row" data-event-id="${escapeAttr(n.event_id)}">
+        <div class="pn-row-content">
+          <p class="pn-row-title">${escapeHtml(n.title)}</p>
+          <p class="pn-row-preview">${escapeHtml(n.preview)}</p>
+        </div>
+        <span class="pn-row-date">${formatShortDate(n.date)}</span>
+      </div>
+    `).join('')}
+  `).join('');
+  el.querySelectorAll('.pn-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const n = state.pastNotesCache.find(x => x.event_id === row.dataset.eventId);
+      if (n) openEventNoteModal(n.event_id, n.title, '—', '');
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ESCAPE HTML
+   ═══════════════════════════════════════════════════════════════ */
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════════ */
+async function init() {
+  renderHero();
+  setInterval(renderHero, 60000);
+  await Promise.all([renderAgenda(), renderTodos(), renderHealth(), loadNotes()]);
+
+  // listeners
+  document.getElementById('btn-add-event').addEventListener('click', openAddEventModal);
+  document.getElementById('btn-expand-todos').addEventListener('click', expandTodos);
+  document.getElementById('btn-refresh-whoop').addEventListener('click', refreshWhoop);
+  document.getElementById('btn-refresh-garmin').addEventListener('click', refreshGarmin);
+  document.getElementById('open-past-notes').addEventListener('click', showPastNotesView);
+  document.getElementById('back-to-dashboard').addEventListener('click', showDashboardView);
+  document.getElementById('pn-search').addEventListener('input', debounce(renderPastNotes, 200));
+  document.getElementById('modal-prep').addEventListener('input', saveEventNoteDebounced);
+  document.getElementById('modal-during').addEventListener('input', saveEventNoteDebounced);
+  document.getElementById('note-add-input').addEventListener('keydown', e => { if (e.key === 'Enter') { addNote(e.target.value); e.target.value = ''; } });
+  document.getElementById('btn-add-longform').addEventListener('click', createLongformNote);
+  document.getElementById('modal-longform-title').addEventListener('input', saveLongformDebounced);
+  document.getElementById('modal-longform-body').addEventListener('input', saveLongformDebounced);
+  document.getElementById('btn-delete-longform').addEventListener('click', deleteCurrentLongform);
+
+  // ESC closes modals
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('event-note-modal').classList.contains('open')) closeEventNoteModal();
+      if (document.getElementById('add-event-modal').classList.contains('open')) closeAddEventModal();
+      if (document.getElementById('longform-note-modal').classList.contains('open')) closeLongformNoteModal();
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
