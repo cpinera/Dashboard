@@ -278,9 +278,9 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0;
   line-height: 1;
 }
-.note-row:hover .note-delete { opacity: 0.55; }
+.note-delete { opacity: 0.4; }
+.note-row:hover .note-delete { opacity: 0.7; }
 .note-row .note-delete:hover { opacity: 1; color: var(--red); background: var(--red-soft); }
-@media (hover: none) { .note-delete { opacity: 0.4; } }
 .note-longform {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
@@ -584,7 +584,7 @@ a { color: inherit; text-decoration: none; }
     <div class="notes-area">
       <div id="notes-list"></div>
       <div class="note-add-row">
-        <input type="text" class="note-add-input" id="note-add-input" placeholder="Escribe y aprieta Enter…  (o '+ check' para checklist)">
+        <input type="text" class="note-add-input" id="note-add-input" placeholder="Escribe y aprieta Enter… (prefijo 'texto:' para nota plana)">
         <button class="btn-add-note" id="btn-add-note" title="Agregar (Enter)" aria-label="Agregar nota">
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
@@ -1180,10 +1180,12 @@ function toggleNote(id) {
   saveNotesDebounced();
 }
 function addNote(text) {
-  const isCheck = text.trim().toLowerCase().startsWith('+ check') || text.trim().startsWith('- [ ]');
-  const clean = text.replace(/^(\+ ?check |- \[ \] )/i, '').trim();
+  // Default: check. Si quieres texto plano, usa prefijo "texto:"
+  const isPlainText = /^texto:\s*/i.test(text.trim());
+  const clean = text.replace(/^(texto:\s*|\+ ?check\s+|- \[ \] )/i, '').trim();
   if (!clean) return;
-  const note = { id: uid(), tipo: isCheck ? 'check' : 'texto', texto: clean, completado: false, creado_en_fecha: state.todayISO };
+  const tipo = isPlainText ? 'texto' : 'check';
+  const note = { id: uid(), tipo, texto: clean, completado: false, creado_en_fecha: state.todayISO };
   state.notes.push(note);
   renderNotes();
   saveNotesDebounced();
