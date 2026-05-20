@@ -1132,10 +1132,9 @@ function renderNotes() {
       const previewText = (n.cuerpo || '').replace(/\s+/g, ' ').trim();
       const previewHtml = previewText ? `<span class="note-longform-preview">${escapeHtml(previewText)}</span>` : '';
       content = `<div class="note-longform" data-longform-id="${escapeAttr(n.id)}"><span class="note-longform-icon">${longformIcon}</span><div class="note-longform-body"><span class="note-longform-title">${titleHtml}</span>${previewHtml}</div></div>`;
-    } else if (n.tipo === 'check') {
-      content = `<div class="note-check ${n.completado ? 'done' : ''}"><input type="checkbox" ${n.completado ? 'checked' : ''} data-toggle-id="${escapeAttr(n.id)}"><span>${escapeHtml(n.texto)}${!n.completado ? carryBadge : ''}</span></div>`;
     } else {
-      content = `<div class="note-line">${escapeHtml(n.texto)}${carryBadge}</div>`;
+      // Toda nota que no sea longform es checkable (incluye 'check' y legacy 'texto')
+      content = `<div class="note-check ${n.completado ? 'done' : ''}"><input type="checkbox" ${n.completado ? 'checked' : ''} data-toggle-id="${escapeAttr(n.id)}"><span>${escapeHtml(n.texto)}${!n.completado ? carryBadge : ''}</span></div>`;
     }
     return `<div class="note-row"><div class="note-content">${content}</div><button class="note-delete" data-delete-id="${escapeAttr(n.id)}" aria-label="Borrar nota">${delIcon}</button></div>`;
   }).join('');
