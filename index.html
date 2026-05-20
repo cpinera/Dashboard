@@ -424,6 +424,58 @@ a { color: inherit; text-decoration: none; }
 .pn-row-preview { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
 .pn-row-date { font-size: 12.5px; color: var(--muted2); white-space: nowrap; font-variant-numeric: tabular-nums; padding-top: 2px; }
 .pn-empty { padding: 40px 0; text-align: center; color: var(--muted2); font-size: 14px; }
+.pn-row-delete {
+  opacity: 0;
+  padding: 4px 8px;
+  font-size: 14px;
+  color: var(--muted2);
+  border-radius: 4px;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  align-self: center;
+}
+.pn-row:hover .pn-row-delete { opacity: 0.55; }
+.pn-row-delete:hover { opacity: 1 !important; color: var(--red); background: var(--red-soft); }
+@media (hover: none) { .pn-row-delete { opacity: 0.4; } }
+
+/* Panel header link (pequeño) */
+.panel-link {
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.15s, background 0.15s;
+  font-family: inherit;
+}
+.panel-link:hover { color: var(--blue); background: var(--blue-soft); }
+.panel-actions { display: inline-flex; gap: 4px; align-items: center; }
+
+/* Botón "+" del input de notas */
+.btn-add-note {
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+.btn-add-note:hover { opacity: 0.9; }
 
 /* ── Icons (inline SVG names) ─────────────────────────── */
 .ic { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; }
@@ -457,10 +509,16 @@ a { color: inherit; text-decoration: none; }
           <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           Agenda de hoy
         </span>
-        <button class="btn-soft" id="btn-add-event">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          Agregar
-        </button>
+        <div class="panel-actions">
+          <button class="panel-link" id="agenda-past-notes" title="Ver notas de reuniones pasadas">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+            <span>Notas pasadas</span>
+          </button>
+          <button class="btn-soft" id="btn-add-event">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Agregar
+          </button>
+        </div>
       </div>
       <div id="agenda-list"></div>
       <button class="btn-ghost-row" onclick="openAddEventModal()">
@@ -515,12 +573,21 @@ a { color: inherit; text-decoration: none; }
         <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
         Notas del día
       </span>
-      <span class="autosave" id="notes-autosave">—</span>
+      <div class="panel-actions">
+        <button class="panel-link" id="btn-past-daily-notes" title="Ver notas de días anteriores">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          <span>Notas anteriores</span>
+        </button>
+        <span class="autosave" id="notes-autosave">—</span>
+      </div>
     </div>
     <div class="notes-area">
       <div id="notes-list"></div>
       <div class="note-add-row">
-        <input type="text" class="note-add-input" id="note-add-input" placeholder="Agregar nota o '+ check' para checklist…">
+        <input type="text" class="note-add-input" id="note-add-input" placeholder="Escribe y aprieta Enter…  (o '+ check' para checklist)">
+        <button class="btn-add-note" id="btn-add-note" title="Agregar (Enter)" aria-label="Agregar nota">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
         <button class="btn-soft" id="btn-add-longform" title="Crear nota larga con título">
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
           Nota larga
@@ -553,6 +620,40 @@ a { color: inherit; text-decoration: none; }
   </div>
   <div id="pn-list"></div>
 </main>
+
+<main id="past-daily-view" class="view hidden">
+  <button class="back-btn" id="back-from-past-daily">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Volver al dashboard
+  </button>
+  <div class="pn-head">
+    <h2 class="pn-title">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+      Notas anteriores
+    </h2>
+    <span class="pn-count" id="past-daily-count">— días</span>
+  </div>
+  <div id="past-daily-list"></div>
+</main>
+
+<!-- Past daily modal (read-only de un día pasado) -->
+<div class="modal" id="past-daily-modal">
+  <div class="modal-backdrop" onclick="closePastDailyModal()"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h2 class="modal-title" id="past-daily-modal-date">—</h2>
+        <p class="modal-meta" id="past-daily-modal-count">—</p>
+      </div>
+      <button class="modal-close" onclick="closePastDailyModal()" aria-label="Cerrar">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="min-height: 200px;">
+      <div id="past-daily-modal-items"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Event note modal -->
 <div class="modal" id="event-note-modal">
@@ -792,6 +893,28 @@ const api = {
       );
     }
     const r = await fetch(`${CONFIG.botApiBase}/dashboard/event-notes?search=${encodeURIComponent(search)}`, { headers: authHeaders() });
+    return r.json();
+  },
+  async deleteEventNote(eventId) {
+    if (CONFIG.useMockData) {
+      MOCK_DATA.pastNotes = MOCK_DATA.pastNotes.filter(n => n.event_id !== eventId);
+      delete MOCK_DATA.eventNotes[eventId];
+      return;
+    }
+    await fetch(`${CONFIG.botApiBase}/dashboard/event-notes/${encodeURIComponent(eventId)}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+  },
+  async loadPastDailyNotes() {
+    if (CONFIG.useMockData) {
+      return [
+        { fecha: '2026-05-18', items_count: 3, archive_count: 2, preview: 'Preparar pitch para reunión Tantauco' },
+        { fecha: '2026-05-17', items_count: 2, archive_count: 1, preview: 'Llamar a banco' },
+        { fecha: '2026-05-16', items_count: 4, archive_count: 0, preview: 'Llamar a Maca por tema viaje' },
+      ];
+    }
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/daily-notes-list`, { headers: authHeaders() });
     return r.json();
   },
 };
@@ -1187,12 +1310,14 @@ async function createEvent() {
 async function showPastNotesView() {
   closeEventNoteModal();
   document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('past-daily-view').classList.add('hidden');
   document.getElementById('past-notes-view').classList.remove('hidden');
   window.scrollTo(0, 0);
   await renderPastNotes();
 }
 function showDashboardView() {
   document.getElementById('past-notes-view').classList.add('hidden');
+  document.getElementById('past-daily-view').classList.add('hidden');
   document.getElementById('dashboard-view').classList.remove('hidden');
   window.scrollTo(0, 0);
 }
@@ -1211,6 +1336,7 @@ async function renderPastNotes() {
     groups[key].push(n);
   });
   state.pastNotesCache = notes;
+  const delIcon = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M5 6l1 14h12l1-14"/></svg>`;
   el.innerHTML = Object.entries(groups).map(([month, items]) => `
     <p class="pn-group">${month}</p>
     ${items.map(n => `
@@ -1220,6 +1346,7 @@ async function renderPastNotes() {
           <p class="pn-row-preview">${escapeHtml(n.preview)}</p>
         </div>
         <span class="pn-row-date">${formatShortDate(n.date)}</span>
+        <button class="pn-row-delete" data-delete-event-id="${escapeAttr(n.event_id)}" aria-label="Borrar nota">${delIcon}</button>
       </div>
     `).join('')}
   `).join('');
@@ -1229,6 +1356,112 @@ async function renderPastNotes() {
       if (n) openEventNoteModal(n.event_id, n.title, '—', '');
     });
   });
+  el.querySelectorAll('[data-delete-event-id]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const id = btn.dataset.deleteEventId;
+      const n = state.pastNotesCache.find(x => x.event_id === id);
+      if (!confirm(`¿Borrar la nota de "${n?.title || 'esta reunión'}"?`)) return;
+      await api.deleteEventNote(id);
+      await renderPastNotes();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAST DAILY NOTES VIEW
+   ═══════════════════════════════════════════════════════════════ */
+function formatDayLong(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return `${DAYS[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+}
+async function showPastDailyView() {
+  closeEventNoteModal();
+  document.getElementById('dashboard-view').classList.add('hidden');
+  document.getElementById('past-notes-view').classList.add('hidden');
+  document.getElementById('past-daily-view').classList.remove('hidden');
+  window.scrollTo(0, 0);
+  await renderPastDailyNotes();
+}
+function showDashboardFromPastDaily() {
+  document.getElementById('past-daily-view').classList.add('hidden');
+  document.getElementById('dashboard-view').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+async function renderPastDailyNotes() {
+  const days = await api.loadPastDailyNotes();
+  const todayStr = state.todayISO;
+  const past = (days || []).filter(d => d.fecha < todayStr);
+  document.getElementById('past-daily-count').textContent = `${past.length} día${past.length === 1 ? '' : 's'}`;
+  const el = document.getElementById('past-daily-list');
+  if (past.length === 0) {
+    el.innerHTML = '<p class="pn-empty">Sin notas de días anteriores</p>';
+    return;
+  }
+  const groups = {};
+  past.forEach(d => {
+    const date = new Date(d.fecha + 'T00:00:00');
+    const key = `${MONTHS[date.getMonth()].charAt(0).toUpperCase() + MONTHS[date.getMonth()].slice(1)} ${date.getFullYear()}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(d);
+  });
+  state.pastDailyCache = past;
+  el.innerHTML = Object.entries(groups).map(([month, items]) => `
+    <p class="pn-group">${month}</p>
+    ${items.map(d => {
+      const total = (d.items_count || 0) + (d.archive_count || 0);
+      return `
+      <div class="pn-row" data-fecha="${escapeAttr(d.fecha)}">
+        <div class="pn-row-content">
+          <p class="pn-row-title">${formatDayLong(d.fecha)}</p>
+          <p class="pn-row-preview">${escapeHtml(d.preview)} · ${total} item${total === 1 ? '' : 's'}</p>
+        </div>
+        <span class="pn-row-date">${formatShortDate(d.fecha)}</span>
+      </div>
+    `;
+    }).join('')}
+  `).join('');
+  el.querySelectorAll('.pn-row').forEach(row => {
+    row.addEventListener('click', () => openPastDailyModal(row.dataset.fecha));
+  });
+}
+async function openPastDailyModal(fecha) {
+  const data = await api.loadDailyNotes(fecha);
+  const items = Array.isArray(data?.items) ? data.items : [];
+  const archive = Array.isArray(data?.archive) ? data.archive : [];
+  document.getElementById('past-daily-modal-date').textContent = formatDayLong(fecha);
+  document.getElementById('past-daily-modal-count').textContent = `${items.length} pendiente${items.length === 1 ? '' : 's'} · ${archive.length} completada${archive.length === 1 ? '' : 's'}`;
+  const itemsEl = document.getElementById('past-daily-modal-items');
+  let html = '';
+  if (items.length === 0 && archive.length === 0) {
+    html = '<p style="color: var(--muted2); font-size: 14px; padding: 8px 0;">Sin notas ese día.</p>';
+  } else {
+    items.forEach(n => {
+      if (n.tipo === 'longform') {
+        const titulo = n.titulo || '(sin título)';
+        const cuerpo = n.cuerpo || '';
+        html += `<div style="padding: 10px 12px; background: var(--surface-soft); border-radius: var(--radius-sm); margin-bottom: 8px;"><div style="font-weight: 500; margin-bottom: 4px;">${escapeHtml(titulo)}</div><div style="font-size: 13px; color: var(--muted); white-space: pre-wrap;">${escapeHtml(cuerpo)}</div></div>`;
+      } else if (n.tipo === 'check') {
+        html += `<div style="padding: 4px 0; display: flex; align-items: flex-start; gap: 8px; font-size: 14px;"><input type="checkbox" ${n.completado ? 'checked' : ''} disabled style="margin-top: 4px;"><span ${n.completado ? 'style="text-decoration: line-through; color: var(--muted2);"' : ''}>${escapeHtml(n.texto)}</span></div>`;
+      } else {
+        html += `<div style="padding: 4px 0; font-size: 14px;">${escapeHtml(n.texto)}</div>`;
+      }
+    });
+    if (archive.length > 0) {
+      html += `<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);"><p class="section-mini">Completadas ese día</p>`;
+      archive.forEach(a => {
+        html += `<div style="padding: 3px 0; font-size: 13px; color: var(--muted);"><span style="color: var(--green); margin-right: 6px;">✓</span>${escapeHtml(a.texto)} <span style="font-size: 11px; color: var(--muted2); margin-left: 4px;">— ${escapeHtml(a.completado_at || '')}</span></div>`;
+      });
+      html += `</div>`;
+    }
+  }
+  itemsEl.innerHTML = html;
+  document.getElementById('past-daily-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePastDailyModal() {
+  document.getElementById('past-daily-modal').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1255,11 +1488,26 @@ async function init() {
   document.getElementById('pn-search').addEventListener('input', debounce(renderPastNotes, 200));
   document.getElementById('modal-prep').addEventListener('input', saveEventNoteDebounced);
   document.getElementById('modal-during').addEventListener('input', saveEventNoteDebounced);
-  document.getElementById('note-add-input').addEventListener('keydown', e => { if (e.key === 'Enter') { addNote(e.target.value); e.target.value = ''; } });
+  const noteInput = document.getElementById('note-add-input');
+  const addCurrentNote = () => {
+    const val = noteInput.value;
+    if (val.trim()) {
+      addNote(val);
+      noteInput.value = '';
+      noteInput.focus();
+    }
+  };
+  noteInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCurrentNote(); } });
+  document.getElementById('btn-add-note').addEventListener('click', addCurrentNote);
   document.getElementById('btn-add-longform').addEventListener('click', createLongformNote);
   document.getElementById('modal-longform-title').addEventListener('input', saveLongformDebounced);
   document.getElementById('modal-longform-body').addEventListener('input', saveLongformDebounced);
   document.getElementById('btn-delete-longform').addEventListener('click', deleteCurrentLongform);
+
+  // Atajos: notas pasadas desde el panel agenda y notas anteriores desde panel daily
+  document.getElementById('agenda-past-notes').addEventListener('click', showPastNotesView);
+  document.getElementById('btn-past-daily-notes').addEventListener('click', showPastDailyView);
+  document.getElementById('back-from-past-daily').addEventListener('click', showDashboardFromPastDaily);
 
   // ESC closes modals
   document.addEventListener('keydown', e => {
@@ -1267,6 +1515,7 @@ async function init() {
       if (document.getElementById('event-note-modal').classList.contains('open')) closeEventNoteModal();
       if (document.getElementById('add-event-modal').classList.contains('open')) closeAddEventModal();
       if (document.getElementById('longform-note-modal').classList.contains('open')) closeLongformNoteModal();
+      if (document.getElementById('past-daily-modal').classList.contains('open')) closePastDailyModal();
     }
   });
 }
