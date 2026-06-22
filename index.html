@@ -281,6 +281,8 @@ a { color: inherit; text-decoration: none; }
 .note-delete { opacity: 0.4; }
 .note-row:hover .note-delete { opacity: 0.7; }
 .note-row .note-delete:hover { opacity: 1; color: var(--red); background: var(--red-soft); }
+.note-text-editable { cursor: text; padding: 2px 4px; border-radius: 3px; transition: background 0.15s; }
+.note-text-editable:hover { background: var(--blue-soft); }
 .note-longform {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
@@ -867,14 +869,36 @@ const api = {
     const r = await fetch(`${CONFIG.healthApiBase}/dashboard/whoop/refresh`, { method: 'POST', headers: authHeaders() });
     return r.json();
   },
-  async loadDailyNotes(fecha) {
-    if (CONFIG.useMockData) return { items: MOCK_DATA.dailyNotes, archive: MOCK_DATA.dailyNotesArchive };
-    const r = await fetch(`${CONFIG.botApiBase}/dashboard/daily-notes/${fecha}`, { headers: authHeaders() });
+  async loadActiveNotes() {
+    if (CONFIG.useMockData) return MOCK_DATA.dailyNotes || [];
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/note-items/active`, { headers: authHeaders() });
     return r.json();
   },
-  async saveDailyNotes(fecha, items, archive) {
-    if (CONFIG.useMockData) { MOCK_DATA.dailyNotes = items; MOCK_DATA.dailyNotesArchive = archive; return; }
-    await fetch(`${CONFIG.botApiBase}/dashboard/daily-notes/${fecha}`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ items, archive }) });
+  async createNote(payload) {
+    if (CONFIG.useMockData) {
+      const note = { id: uid(), creado_at: new Date().toISOString(), completado: false, deleted: false, tipo: 'check', texto: '', titulo: '', cuerpo: '', ...payload };
+      MOCK_DATA.dailyNotes.push(note);
+      return { ok: true, item: note };
+    }
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/note-items`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    return r.json();
+  },
+  async updateNote(id, fields) {
+    if (CONFIG.useMockData) {
+      const n = MOCK_DATA.dailyNotes.find(x => x.id === id);
+      if (n) Object.assign(n, fields, fields.completado !== undefined ? { completado_at: fields.completado ? new Date().toISOString() : null } : {});
+      return { ok: true };
+    }
+    await fetch(`${CONFIG.botApiBase}/dashboard/note-items/${id}`, { method: 'PATCH', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
+  },
+  async deleteNoteApi(id) {
+    if (CONFIG.useMockData) { MOCK_DATA.dailyNotes = MOCK_DATA.dailyNotes.filter(x => x.id !== id); return; }
+    await fetch(`${CONFIG.botApiBase}/dashboard/note-items/${id}`, { method: 'DELETE', headers: authHeaders() });
+  },
+  async loadNotesHistory() {
+    if (CONFIG.useMockData) return MOCK_DATA.dailyNotes || [];
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/note-items/history`, { headers: authHeaders() });
+    return r.json();
   },
   async loadEventNote(eventId) {
     if (CONFIG.useMockData) return MOCK_DATA.eventNotes[eventId] || { prep: '', durante: '' };
@@ -1107,14 +1131,13 @@ async function refreshGarmin() {
    ═══════════════════════════════════════════════════════════════ */
 async function loadNotes() {
   try {
-    const data = await api.loadDailyNotes(state.todayISO);
-    state.notes = Array.isArray(data?.items) ? data.items : [];
-    state.notesArchive = Array.isArray(data?.archive) ? data.archive : [];
+    const items = await api.loadActiveNotes();
+    state.notes = Array.isArray(items) ? items : [];
   } catch (e) {
     console.error('loadNotes error:', e);
     state.notes = [];
-    state.notesArchive = [];
   }
+  state.notesArchive = []; // legacy, ya no se usa
   renderNotes();
 }
 function renderNotes() {
@@ -1122,8 +1145,9 @@ function renderNotes() {
   const delIcon = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
   const longformIcon = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H10M16 17H10"/></svg>`;
   el.innerHTML = state.notes.map(n => {
-    const days = n.creado_en_fecha ? daysBetween(n.creado_en_fecha, state.todayISO) : 0;
-    const carryBadge = days >= 1
+    const creadoFecha = (n.creado_at || '').slice(0, 10);
+    const days = creadoFecha ? daysBetween(creadoFecha, state.todayISO) : 0;
+    const carryBadge = (days >= 1 && !n.completado)
       ? `<span class="from-yesterday"><svg class="ic" style="font-size:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>${days === 1 ? 'viene de ayer' : days + ' días'}</span>`
       : '';
     let content;
@@ -1133,8 +1157,8 @@ function renderNotes() {
       const previewHtml = previewText ? `<span class="note-longform-preview">${escapeHtml(previewText)}</span>` : '';
       content = `<div class="note-longform" data-longform-id="${escapeAttr(n.id)}"><span class="note-longform-icon">${longformIcon}</span><div class="note-longform-body"><span class="note-longform-title">${titleHtml}</span>${previewHtml}</div></div>`;
     } else {
-      // Toda nota que no sea longform es checkable (incluye 'check' y legacy 'texto')
-      content = `<div class="note-check ${n.completado ? 'done' : ''}"><input type="checkbox" ${n.completado ? 'checked' : ''} data-toggle-id="${escapeAttr(n.id)}"><span>${escapeHtml(n.texto)}${!n.completado ? carryBadge : ''}</span></div>`;
+      // Check + editable text on click
+      content = `<div class="note-check ${n.completado ? 'done' : ''}"><input type="checkbox" ${n.completado ? 'checked' : ''} data-toggle-id="${escapeAttr(n.id)}"><span class="note-text-editable" data-edit-id="${escapeAttr(n.id)}" title="Click para editar">${escapeHtml(n.texto)}${!n.completado ? carryBadge : ''}</span></div>`;
     }
     return `<div class="note-row"><div class="note-content">${content}</div><button class="note-delete" data-delete-id="${escapeAttr(n.id)}" aria-label="Borrar nota">${delIcon}</button></div>`;
   }).join('');
@@ -1147,52 +1171,63 @@ function renderNotes() {
   el.querySelectorAll('[data-longform-id]').forEach(row => {
     row.addEventListener('click', () => openLongformNoteModal(row.dataset.longformId));
   });
-  // archive
-  const archEl = document.getElementById('note-archive');
-  const archList = document.getElementById('note-archive-list');
-  if (state.notesArchive.length > 0) {
-    archEl.style.display = 'block';
-    archList.innerHTML = state.notesArchive.map(a => `
-      <div class="archive-row">
-        <span class="check-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
-        <span>${escapeHtml(a.texto)}<span class="time">— completada ${a.completado_at}</span></span>
-      </div>
-    `).join('');
-  } else {
-    archEl.style.display = 'none';
-  }
+  el.querySelectorAll('[data-edit-id]').forEach(span => {
+    span.addEventListener('click', e => { e.stopPropagation(); startEditNote(span.dataset.editId, span); });
+  });
+  document.getElementById('note-archive').style.display = 'none';
 }
-function deleteNote(id) {
+function startEditNote(id, spanEl) {
+  const n = state.notes.find(x => x.id === id);
+  if (!n) return;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = n.texto || '';
+  input.className = 'note-edit-input';
+  input.style.cssText = 'flex:1; border:1px solid var(--blue); border-radius:4px; padding:4px 8px; font-size:14px; font-family:inherit; outline:none; background:white;';
+  spanEl.replaceWith(input);
+  input.focus();
+  input.select();
+  const save = async () => {
+    const newText = input.value.trim();
+    if (newText && newText !== n.texto) {
+      n.texto = newText;
+      await api.updateNote(id, { texto: newText });
+    }
+    renderNotes();
+  };
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { renderNotes(); }
+  });
+}
+async function deleteNote(id) {
   state.notes = state.notes.filter(n => n.id !== id);
   renderNotes();
-  saveNotesDebounced();
+  await api.deleteNoteApi(id);
 }
-function toggleNote(id) {
+async function toggleNote(id) {
   const n = state.notes.find(x => x.id === id);
   if (!n) return;
   n.completado = !n.completado;
-  if (n.completado) {
-    state.notes = state.notes.filter(x => x.id !== id);
-    state.notesArchive.push({ id, texto: n.texto, completado_at: formatClock(new Date()) });
-  }
+  n.completado_at = n.completado ? new Date().toISOString() : null;
   renderNotes();
-  saveNotesDebounced();
+  await api.updateNote(id, { completado: n.completado });
+  flashSaved();
 }
-function addNote(text) {
-  // Default: check. Si quieres texto plano, usa prefijo "texto:"
-  const isPlainText = /^texto:\s*/i.test(text.trim());
+async function addNote(text) {
   const clean = text.replace(/^(texto:\s*|\+ ?check\s+|- \[ \] )/i, '').trim();
   if (!clean) return;
-  const tipo = isPlainText ? 'texto' : 'check';
-  const note = { id: uid(), tipo, texto: clean, completado: false, creado_en_fecha: state.todayISO };
-  state.notes.push(note);
+  const tipo = 'check';
+  const r = await api.createNote({ tipo, texto: clean });
+  const item = r?.item || { id: uid(), tipo, texto: clean, completado: false, creado_at: new Date().toISOString() };
+  state.notes.push(item);
   renderNotes();
-  saveNotesDebounced();
+  flashSaved();
 }
-const saveNotesDebounced = debounce(async () => {
-  await api.saveDailyNotes(state.todayISO, state.notes, state.notesArchive);
+function flashSaved() {
   document.getElementById('notes-autosave').innerHTML = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Guardado · ${formatClock(new Date())}`;
-}, 600);
+}
 
 /* ═══════════════════════════════════════════════════════════════
    LONGFORM NOTE MODAL
@@ -1203,7 +1238,7 @@ function openLongformNoteModal(noteId) {
   state.currentLongformId = noteId;
   document.getElementById('modal-longform-title').value = n.titulo || '';
   document.getElementById('modal-longform-body').value = n.cuerpo || '';
-  document.getElementById('modal-longform-meta').textContent = `Nota del ${formatFullDate(new Date(n.creado_en_fecha + 'T00:00:00'))}`;
+  document.getElementById('modal-longform-meta').textContent = `Nota del ${formatFullDate(new Date((n.creado_at || new Date().toISOString()).slice(0,10) + 'T00:00:00'))}`;
   document.getElementById('modal-longform-autosave').innerHTML = (n.titulo || n.cuerpo) ? `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Guardado` : 'Sin cambios';
   document.getElementById('longform-note-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1219,30 +1254,31 @@ function closeLongformNoteModal() {
   state.currentLongformId = null;
   renderNotes();
 }
-const saveLongformDebounced = debounce(() => {
+const saveLongformDebounced = debounce(async () => {
   if (!state.currentLongformId) return;
   const n = state.notes.find(x => x.id === state.currentLongformId);
   if (!n) return;
   n.titulo = document.getElementById('modal-longform-title').value;
   n.cuerpo = document.getElementById('modal-longform-body').value;
   document.getElementById('modal-longform-autosave').innerHTML = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Guardado · ${formatClock(new Date())}`;
-  saveNotesDebounced();
+  await api.updateNote(n.id, { titulo: n.titulo, cuerpo: n.cuerpo });
+  flashSaved();
 }, 400);
-function createLongformNote() {
-  const note = { id: uid(), tipo: 'longform', titulo: '', cuerpo: '', creado_en_fecha: state.todayISO };
-  state.notes.push(note);
+async function createLongformNote() {
+  const r = await api.createNote({ tipo: 'longform', titulo: '', cuerpo: '' });
+  const item = r?.item || { id: uid(), tipo: 'longform', titulo: '', cuerpo: '', creado_at: new Date().toISOString() };
+  state.notes.push(item);
   renderNotes();
-  openLongformNoteModal(note.id);
-  saveNotesDebounced();
+  openLongformNoteModal(item.id);
 }
-function deleteCurrentLongform() {
+async function deleteCurrentLongform() {
   if (!state.currentLongformId) return;
   if (!confirm('¿Borrar esta nota? Esta acción no se puede deshacer.')) return;
   const id = state.currentLongformId;
   closeLongformNoteModal();
   state.notes = state.notes.filter(n => n.id !== id);
   renderNotes();
-  saveNotesDebounced();
+  await api.deleteNoteApi(id);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1390,34 +1426,47 @@ function showDashboardFromPastDaily() {
   window.scrollTo(0, 0);
 }
 async function renderPastDailyNotes() {
-  const days = await api.loadPastDailyNotes();
+  const allItems = await api.loadNotesHistory();
   const todayStr = state.todayISO;
-  const past = (days || []).filter(d => d.fecha < todayStr);
-  document.getElementById('past-daily-count').textContent = `${past.length} día${past.length === 1 ? '' : 's'}`;
+  // Agrupar por fecha de creación, excluir las creadas hoy (esas están en el panel principal)
+  const byDate = {};
+  (allItems || []).forEach(n => {
+    const fecha = (n.creado_at || '').slice(0, 10);
+    if (!fecha || fecha === todayStr) return;
+    if (!byDate[fecha]) byDate[fecha] = [];
+    byDate[fecha].push(n);
+  });
+  const fechas = Object.keys(byDate).sort().reverse();
+  document.getElementById('past-daily-count').textContent = `${fechas.length} día${fechas.length === 1 ? '' : 's'}`;
   const el = document.getElementById('past-daily-list');
-  if (past.length === 0) {
+  if (fechas.length === 0) {
     el.innerHTML = '<p class="pn-empty">Sin notas de días anteriores</p>';
     return;
   }
+  // Agrupar las fechas por mes
   const groups = {};
-  past.forEach(d => {
-    const date = new Date(d.fecha + 'T00:00:00');
-    const key = `${MONTHS[date.getMonth()].charAt(0).toUpperCase() + MONTHS[date.getMonth()].slice(1)} ${date.getFullYear()}`;
+  fechas.forEach(f => {
+    const d = new Date(f + 'T00:00:00');
+    const key = `${MONTHS[d.getMonth()].charAt(0).toUpperCase() + MONTHS[d.getMonth()].slice(1)} ${d.getFullYear()}`;
     if (!groups[key]) groups[key] = [];
-    groups[key].push(d);
+    groups[key].push(f);
   });
-  state.pastDailyCache = past;
-  el.innerHTML = Object.entries(groups).map(([month, items]) => `
+  state.pastDailyCache = byDate;
+  el.innerHTML = Object.entries(groups).map(([month, dates]) => `
     <p class="pn-group">${month}</p>
-    ${items.map(d => {
-      const total = (d.items_count || 0) + (d.archive_count || 0);
+    ${dates.map(f => {
+      const items = byDate[f];
+      const completadas = items.filter(x => x.completado).length;
+      const pendientes = items.length - completadas;
+      const firstItem = items[0];
+      const preview = firstItem.tipo === 'longform' ? (firstItem.titulo || '(sin título)') : (firstItem.texto || '');
       return `
-      <div class="pn-row" data-fecha="${escapeAttr(d.fecha)}">
+      <div class="pn-row" data-fecha="${escapeAttr(f)}">
         <div class="pn-row-content">
-          <p class="pn-row-title">${formatDayLong(d.fecha)}</p>
-          <p class="pn-row-preview">${escapeHtml(d.preview)} · ${total} item${total === 1 ? '' : 's'}</p>
+          <p class="pn-row-title">${formatDayLong(f)}</p>
+          <p class="pn-row-preview">${escapeHtml(preview)} · ${pendientes} pendiente${pendientes === 1 ? '' : 's'}${completadas > 0 ? `, ${completadas} completada${completadas === 1 ? '' : 's'}` : ''}</p>
         </div>
-        <span class="pn-row-date">${formatShortDate(d.fecha)}</span>
+        <span class="pn-row-date">${formatShortDate(f)}</span>
       </div>
     `;
     }).join('')}
@@ -1426,15 +1475,15 @@ async function renderPastDailyNotes() {
     row.addEventListener('click', () => openPastDailyModal(row.dataset.fecha));
   });
 }
-async function openPastDailyModal(fecha) {
-  const data = await api.loadDailyNotes(fecha);
-  const items = Array.isArray(data?.items) ? data.items : [];
-  const archive = Array.isArray(data?.archive) ? data.archive : [];
+function openPastDailyModal(fecha) {
+  const items = state.pastDailyCache?.[fecha] || [];
+  const pendientes = items.filter(n => !n.completado);
+  const completadas = items.filter(n => n.completado);
   document.getElementById('past-daily-modal-date').textContent = formatDayLong(fecha);
-  document.getElementById('past-daily-modal-count').textContent = `${items.length} pendiente${items.length === 1 ? '' : 's'} · ${archive.length} completada${archive.length === 1 ? '' : 's'}`;
+  document.getElementById('past-daily-modal-count').textContent = `${pendientes.length} pendiente${pendientes.length === 1 ? '' : 's'} · ${completadas.length} completada${completadas.length === 1 ? '' : 's'}`;
   const itemsEl = document.getElementById('past-daily-modal-items');
   let html = '';
-  if (items.length === 0 && archive.length === 0) {
+  if (items.length === 0) {
     html = '<p style="color: var(--muted2); font-size: 14px; padding: 8px 0;">Sin notas ese día.</p>';
   } else {
     items.forEach(n => {
@@ -1442,19 +1491,11 @@ async function openPastDailyModal(fecha) {
         const titulo = n.titulo || '(sin título)';
         const cuerpo = n.cuerpo || '';
         html += `<div style="padding: 10px 12px; background: var(--surface-soft); border-radius: var(--radius-sm); margin-bottom: 8px;"><div style="font-weight: 500; margin-bottom: 4px;">${escapeHtml(titulo)}</div><div style="font-size: 13px; color: var(--muted); white-space: pre-wrap;">${escapeHtml(cuerpo)}</div></div>`;
-      } else if (n.tipo === 'check') {
-        html += `<div style="padding: 4px 0; display: flex; align-items: flex-start; gap: 8px; font-size: 14px;"><input type="checkbox" ${n.completado ? 'checked' : ''} disabled style="margin-top: 4px;"><span ${n.completado ? 'style="text-decoration: line-through; color: var(--muted2);"' : ''}>${escapeHtml(n.texto)}</span></div>`;
       } else {
-        html += `<div style="padding: 4px 0; font-size: 14px;">${escapeHtml(n.texto)}</div>`;
+        const style = n.completado ? 'style="text-decoration: line-through; color: var(--muted2);"' : '';
+        html += `<div style="padding: 4px 0; display: flex; align-items: flex-start; gap: 8px; font-size: 14px;"><input type="checkbox" ${n.completado ? 'checked' : ''} disabled style="margin-top: 4px;"><span ${style}>${escapeHtml(n.texto)}</span></div>`;
       }
     });
-    if (archive.length > 0) {
-      html += `<div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);"><p class="section-mini">Completadas ese día</p>`;
-      archive.forEach(a => {
-        html += `<div style="padding: 3px 0; font-size: 13px; color: var(--muted);"><span style="color: var(--green); margin-right: 6px;">✓</span>${escapeHtml(a.texto)} <span style="font-size: 11px; color: var(--muted2); margin-left: 4px;">— ${escapeHtml(a.completado_at || '')}</span></div>`;
-      });
-      html += `</div>`;
-    }
   }
   itemsEl.innerHTML = html;
   document.getElementById('past-daily-modal').classList.add('open');
