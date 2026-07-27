@@ -69,9 +69,6 @@ a { color: inherit; text-decoration: none; }
 .linkbtn:hover { background: rgba(15, 25, 50, 0.05); color: var(--text); }
 
 /* ── Layout ───────────────────────────────────────────── */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-@media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
-
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -154,54 +151,7 @@ a { color: inherit; text-decoration: none; }
 .evt-note-btn:hover { color: var(--blue); background: var(--blue-soft); }
 .evt-note-btn.has { color: var(--blue); }
 
-/* ── Todos ────────────────────────────────────────────── */
-.todo {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
-  font-size: 15px;
-}
-.todo:first-of-type { border-top: none; padding-top: 0; }
-.todo input[type="checkbox"] {
-  width: 18px; height: 18px; flex-shrink: 0;
-  accent-color: var(--blue);
-  cursor: pointer;
-}
-.todo.done .todo-text { text-decoration: line-through; color: var(--muted2); }
-.badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  min-width: 42px;
-  text-align: center;
-  letter-spacing: 0.02em;
-}
-.badge-alta { background: var(--red-soft); color: var(--red-dark); }
-.badge-media { background: var(--amber-soft); color: var(--amber-dark); }
-.badge-baja { background: var(--blue-soft); color: var(--blue-dark); }
-.todo-text { flex: 1; }
-
-/* ── Health ───────────────────────────────────────────── */
-.health-refresh { display: flex; gap: 6px; }
-.metrics-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-.metric {
-  background: var(--surface-soft);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  border: 1px solid transparent;
-  transition: background 0.2s, border-color 0.2s;
-}
-.metric-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-.metric-val { font-size: 26px; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; }
-.metric-sub { font-size: 12px; color: var(--muted2); margin-top: 4px; }
-.metric.zone-green  { background: var(--green-soft); border-color: rgba(22, 163, 74, 0.18); }
-.metric.zone-yellow { background: var(--amber-soft); border-color: rgba(194, 104, 12, 0.22); }
-.metric.zone-red    { background: var(--red-soft);   border-color: rgba(198, 50, 50, 0.22); }
-.metric.zone-green  .metric-val, .metric.zone-green  .metric-sub-strong { color: var(--green-dark); }
-.metric.zone-yellow .metric-val, .metric.zone-yellow .metric-sub-strong { color: var(--amber-dark); }
-.metric.zone-red    .metric-val, .metric.zone-red    .metric-sub-strong { color: var(--red-dark); }
-.metric-sub-strong { font-size: 13px; font-weight: 500; margin-top: 4px; }
+/* ── Daily notes ──────────────────────────────────────── */
 .section-label {
   font-size: 10.5px;
   font-weight: 600;
@@ -210,27 +160,6 @@ a { color: inherit; text-decoration: none; }
   color: var(--muted2);
   margin: 6px 0 4px;
 }
-.act-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 11px 0;
-  border-top: 1px solid var(--border);
-  font-size: 14.5px;
-}
-.act-row:first-of-type { border-top: none; padding-top: 8px; }
-.act-icon { font-size: 20px; color: var(--muted); width: 24px; text-align: center; }
-.act-name { flex: 1; font-weight: 500; }
-.act-name-sub { font-size: 11px; color: var(--muted2); font-weight: 400; margin-left: 2px; }
-.act-vals { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 8px; }
-.act-vals .sep { margin: 0 7px; color: var(--muted2); }
-.zone-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.zone-dot.zone-green  { background: var(--green); }
-.zone-dot.zone-yellow { background: var(--amber); }
-.zone-dot.zone-red    { background: var(--red); }
-.act-row.zone-green  .act-vals { color: var(--green-dark); font-weight: 500; }
-.act-row.zone-yellow .act-vals { color: var(--amber-dark); font-weight: 500; }
-.act-row.zone-red    .act-vals { color: var(--red-dark); font-weight: 500; }
-
-/* ── Daily notes ──────────────────────────────────────── */
 .notes-area {
   background: var(--surface-soft);
   border-radius: var(--radius);
@@ -504,8 +433,7 @@ a { color: inherit; text-decoration: none; }
     </div>
   </div>
 
-  <div class="grid-2">
-    <section class="card" id="agenda-card">
+  <section class="card" id="agenda-card">
       <div class="card-head">
         <span class="card-h">
           <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -528,46 +456,6 @@ a { color: inherit; text-decoration: none; }
         Agregar evento al calendario
       </button>
     </section>
-
-    <section class="card" id="todos-card">
-      <div class="card-head">
-        <span class="card-h">
-          <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Top to-dos
-        </span>
-        <span style="font-size: 11px; color: var(--muted2);" id="todos-count">—</span>
-      </div>
-      <div id="todos-list"></div>
-      <button class="btn-expand" id="btn-expand-todos">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        <span id="expand-label">Ver 3 más</span>
-      </button>
-    </section>
-  </div>
-
-  <section class="card">
-    <div class="card-head">
-      <span class="card-h">
-        <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        Salud
-      </span>
-      <div class="health-refresh">
-        <button class="btn-soft" id="btn-refresh-whoop">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 14.66-7"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-14.66 7"/><path d="M3 20v-5h5"/></svg>
-          Whoop
-        </button>
-        <button class="btn-soft" id="btn-refresh-garmin">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 14.66-7"/><path d="M21 4v5h-5"/><path d="M21 12a9 9 0 0 1-14.66 7"/><path d="M3 20v-5h5"/></svg>
-          Garmin
-        </button>
-      </div>
-    </div>
-
-    <div class="metrics-2" id="bienestar-block"></div>
-
-    <p class="section-label">Actividad</p>
-    <div id="actividad-list"></div>
-  </section>
 
   <section class="card">
     <div class="card-head">
@@ -776,31 +664,6 @@ const MOCK_DATA = {
     { id: 'ev3', start: '14:00', end: '15:00', title: 'Almuerzo con Felipe', hasNote: false },
     { id: 'ev4', start: '16:30', end: '17:30', title: 'Revisión semanal pipeline', hasNote: true },
   ],
-  todos: [
-    { id: 1, nombre: 'Cerrar memo de inversión a Acme', urgencia: 'Alta', estado: 'Pendiente' },
-    { id: 2, nombre: 'Responder a LPs sobre Q1', urgencia: 'Alta', estado: 'Pendiente' },
-    { id: 3, nombre: 'Coordinar viaje a SF de junio', urgencia: 'Media', estado: 'Pendiente' },
-    { id: 4, nombre: 'Revisar presupuesto Q2', urgencia: 'Media', estado: 'Pendiente' },
-    { id: 5, nombre: 'Llamar a Juan por tema legal', urgencia: 'Media', estado: 'Pendiente' },
-    { id: 6, nombre: 'Actualizar dashboard de KPIs', urgencia: 'Baja', estado: 'Pendiente' },
-    { id: 7, nombre: 'Agendar dentista', urgencia: 'Baja', estado: 'Pendiente' },
-    { id: 8, nombre: 'Revisar PR de tobin-bot', urgencia: 'Baja', estado: 'Pendiente' },
-    { id: 9, nombre: 'Mandar follow-up a Tropic Ventures', urgencia: 'Media', estado: 'Pendiente' },
-    { id: 10, nombre: 'Pagar cuentas pendientes', urgencia: 'Baja', estado: 'Pendiente' },
-    { id: 11, nombre: 'Comprar regalos cumpleaños Maca', urgencia: 'Media', estado: 'Pendiente' },
-    { id: 12, nombre: 'Llamar a fondo X', urgencia: 'Baja', estado: 'Pendiente' },
-  ],
-  health: {
-    recovery: 78,
-    sleep_hours: 7, sleep_minutes: 23, sleep_score: 89,
-    recovery_zone: 'Zona verde',
-    activities: [
-      { categoria: 'Trote',  icon: 'run',  hoy: { unit: 'km', val: 6.5 }, semana: { unit: 'km', val: 28.4 } },
-      { categoria: 'Bici',   icon: 'bike', hoy: null,                     semana: { unit: 'km', val: 42 } },
-      { categoria: 'Nado',   icon: 'swim', hoy: null,                     semana: null },
-      { categoria: 'Gym',    icon: 'gym',  hoy: { unit: 'sesión', val: 1 }, semana: { unit: 'sesión', val: 4 }, source: 'Whoop' },
-    ],
-  },
   dailyNotes: [
     { id: 'n1', tipo: 'texto', texto: 'Preparar pitch para reunión Tantauco', creado_en_fecha: '2026-05-18' },
     { id: 'n2', tipo: 'check', texto: 'Revisar memo Acme antes de las 11', completado: false, creado_en_fecha: '2026-05-17' },
@@ -839,35 +702,6 @@ const api = {
   async createEvent(payload) {
     if (CONFIG.useMockData) { MOCK_DATA.calendar.push({ ...payload, id: 'mock' + Date.now(), hasNote: false }); return; }
     await fetch(`${CONFIG.botApiBase}/dashboard/calendar/event`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-  },
-  async loadTodos(limit = 3, offset = 0) {
-    if (CONFIG.useMockData) {
-      const pendientes = MOCK_DATA.todos.filter(t => t.estado === 'Pendiente');
-      const orderUrg = { 'Alta': 0, 'Media': 1, 'Baja': 2 };
-      pendientes.sort((a, b) => orderUrg[a.urgencia] - orderUrg[b.urgencia]);
-      return { items: pendientes.slice(offset, offset + limit), total: pendientes.length };
-    }
-    const r = await fetch(`${CONFIG.botApiBase}/dashboard/tasks?limit=${limit}&offset=${offset}`, { headers: authHeaders() });
-    return r.json();
-  },
-  async completeTodo(id) {
-    if (CONFIG.useMockData) { const t = MOCK_DATA.todos.find(x => x.id === id); if (t) t.estado = 'Completada'; return; }
-    await fetch(`${CONFIG.botApiBase}/dashboard/tasks/${id}`, { method: 'PATCH', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ estado: 'Completada' }) });
-  },
-  async loadHealth() {
-    if (CONFIG.useMockData) return MOCK_DATA.health;
-    const r = await fetch(`${CONFIG.healthApiBase}/dashboard/health/today`, { headers: authHeaders() });
-    return r.json();
-  },
-  async refreshGarmin() {
-    if (CONFIG.useMockData) { await new Promise(r => setTimeout(r, 800)); return MOCK_DATA.health; }
-    const r = await fetch(`${CONFIG.healthApiBase}/dashboard/garmin/refresh`, { method: 'POST', headers: authHeaders() });
-    return r.json();
-  },
-  async refreshWhoop() {
-    if (CONFIG.useMockData) { await new Promise(r => setTimeout(r, 800)); return MOCK_DATA.health; }
-    const r = await fetch(`${CONFIG.healthApiBase}/dashboard/whoop/refresh`, { method: 'POST', headers: authHeaders() });
-    return r.json();
   },
   async loadActiveNotes() {
     if (CONFIG.useMockData) return MOCK_DATA.dailyNotes || [];
@@ -965,8 +799,6 @@ function uid() { return 'i' + Math.random().toString(36).slice(2, 9); }
    ═══════════════════════════════════════════════════════════════ */
 const state = {
   todayISO: todayISO(),
-  todosVisible: 3,
-  todosTotal: 0,
   notes: [],
   notesArchive: [],
   modalEventId: null,
@@ -1014,116 +846,6 @@ async function renderAgenda() {
       if (ev) openEventNoteModal(ev.id, ev.title, ev.start, ev.end || '');
     });
   });
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   RENDER: TODOS
-   ═══════════════════════════════════════════════════════════════ */
-async function renderTodos() {
-  const { items, total } = await api.loadTodos(state.todosVisible, 0);
-  state.todosTotal = total;
-  document.getElementById('todos-count').textContent = `${items.length} de ${total}`;
-  const el = document.getElementById('todos-list');
-  el.innerHTML = items.map(t => `
-    <div class="todo">
-      <input type="checkbox" onchange="completeTodo(${t.id})" aria-label="Completar">
-      <span class="badge badge-${t.urgencia.toLowerCase()}">${t.urgencia}</span>
-      <span class="todo-text">${escapeHtml(t.nombre)}</span>
-    </div>
-  `).join('');
-  const expandBtn = document.getElementById('btn-expand-todos');
-  const remaining = total - items.length;
-  if (remaining <= 0) { expandBtn.style.display = 'none'; }
-  else { expandBtn.style.display = 'flex'; document.getElementById('expand-label').textContent = `Ver ${Math.min(3, remaining)} más`; }
-}
-async function completeTodo(id) {
-  await api.completeTodo(id);
-  await renderTodos();
-}
-function expandTodos() { state.todosVisible += 3; renderTodos(); }
-
-/* ═══════════════════════════════════════════════════════════════
-   RENDER: HEALTH
-   ═══════════════════════════════════════════════════════════════ */
-function recoveryZone(score) {
-  if (score >= 67) return 'green';
-  if (score >= 34) return 'yellow';
-  return 'red';
-}
-function sleepZone(hours, minutes) {
-  const total = hours + (minutes || 0) / 60;
-  if (total >= 6) return 'green';
-  if (total >= 5) return 'yellow';
-  return 'red';
-}
-function gymZone(weeklyCount) {
-  if (weeklyCount >= 3) return 'green';
-  if (weeklyCount === 2) return 'yellow';
-  return 'red';
-}
-
-async function renderHealth() {
-  const h = await api.loadHealth();
-  const rZone = recoveryZone(h.recovery || 0);
-  const sZone = sleepZone(h.sleep_hours || 0, h.sleep_minutes || 0);
-  const bienestar = document.getElementById('bienestar-block');
-  bienestar.innerHTML = `
-    <div class="metric zone-${rZone}">
-      <p class="metric-label">Recovery (Whoop)</p>
-      <p class="metric-val">${h.recovery}%</p>
-      <p class="metric-sub-strong">${h.recovery_zone}</p>
-    </div>
-    <div class="metric zone-${sZone}">
-      <p class="metric-label">Sueño anoche</p>
-      <p class="metric-val">${h.sleep_hours}h ${h.sleep_minutes}m</p>
-      <p class="metric-sub-strong">Score ${h.sleep_score}</p>
-    </div>
-  `;
-  const visible = h.activities.filter(a => a.hoy || a.semana);
-  const act = document.getElementById('actividad-list');
-  if (visible.length === 0) {
-    act.innerHTML = '<p style="color: var(--muted2); font-size: 13px; padding: 10px 0;">Sin actividad registrada</p>';
-    return;
-  }
-  act.innerHTML = visible.map(a => {
-    const partes = [];
-    if (a.hoy) partes.push(`hoy ${a.hoy.val} ${a.hoy.unit}${a.hoy.val !== 1 && a.hoy.unit === 'sesión' ? 'es' : ''}`);
-    if (a.semana) partes.push(`7d ${a.semana.val} ${a.semana.unit}${a.semana.val !== 1 && a.semana.unit === 'sesión' ? 'es' : ''}`);
-    let zoneClass = '';
-    let dot = '';
-    if (a.categoria === 'Gym') {
-      const weekly = a.semana?.val || 0;
-      const z = gymZone(weekly);
-      zoneClass = ` zone-${z}`;
-      dot = `<span class="zone-dot zone-${z}" aria-label="zona ${z}"></span>`;
-    }
-    return `
-      <div class="act-row${zoneClass}">
-        <span class="act-icon">${iconFor(a.icon)}</span>
-        <span class="act-name">${a.categoria}${a.source ? `<span class="act-name-sub"> (${a.source})</span>` : ''}</span>
-        <span class="act-vals">${partes.join('<span class="sep">·</span>')}${dot}</span>
-      </div>
-    `;
-  }).join('');
-}
-function iconFor(name) {
-  const icons = {
-    run: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M5 22l5-10 4 3 4-6"/><path d="M9 7l3 2 3-1"/></svg>',
-    bike: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="17" r="4"/><circle cx="18" cy="17" r="4"/><path d="M6 17l4-9h5l3 9M10 8h4"/></svg>',
-    swim: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1 2-1 4-1"/><path d="M2 14c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1 2-1 4-1"/><circle cx="17" cy="7" r="2"/></svg>',
-    gym: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6v12M18 6v12M3 9v6M21 9v6M6 12h12"/></svg>',
-  };
-  return icons[name] || icons.run;
-}
-async function refreshWhoop() {
-  const btn = document.getElementById('btn-refresh-whoop'); btn.style.opacity = '0.5'; btn.disabled = true;
-  await api.refreshWhoop(); await renderHealth();
-  btn.style.opacity = ''; btn.disabled = false;
-}
-async function refreshGarmin() {
-  const btn = document.getElementById('btn-refresh-garmin'); btn.style.opacity = '0.5'; btn.disabled = true;
-  await api.refreshGarmin(); await renderHealth();
-  btn.style.opacity = ''; btn.disabled = false;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1518,13 +1240,10 @@ function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp
 async function init() {
   renderHero();
   setInterval(renderHero, 60000);
-  await Promise.all([renderAgenda(), renderTodos(), renderHealth(), loadNotes()]);
+  await Promise.all([renderAgenda(), loadNotes()]);
 
   // listeners
   document.getElementById('btn-add-event').addEventListener('click', openAddEventModal);
-  document.getElementById('btn-expand-todos').addEventListener('click', expandTodos);
-  document.getElementById('btn-refresh-whoop').addEventListener('click', refreshWhoop);
-  document.getElementById('btn-refresh-garmin').addEventListener('click', refreshGarmin);
   document.getElementById('open-past-notes').addEventListener('click', showPastNotesView);
   document.getElementById('back-to-dashboard').addEventListener('click', showDashboardView);
   document.getElementById('pn-search').addEventListener('input', debounce(renderPastNotes, 200));
