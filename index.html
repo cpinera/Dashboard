@@ -408,6 +408,49 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-add-note:hover { opacity: 0.9; }
 
+/* ── Tabs ─────────────────────────────────────────────── */
+.tabs { display: flex; gap: 4px; margin-bottom: 22px; border-bottom: 1px solid var(--border); }
+.tab {
+  font-size: 14.5px; font-weight: 500; color: var(--muted);
+  padding: 10px 16px; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: color 0.15s, border-color 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-panel.hidden { display: none; }
+
+/* ── Month nav ────────────────────────────────────────── */
+.month-nav { display: inline-flex; align-items: center; gap: 2px; }
+.month-btn { color: var(--muted); padding: 4px 6px; border-radius: var(--radius-sm); transition: background 0.15s, color 0.15s; }
+.month-btn:hover { background: var(--surface-soft); color: var(--text); }
+.month-label { font-size: 13px; color: var(--muted); min-width: 104px; text-align: center; text-transform: capitalize; font-variant-numeric: tabular-nums; }
+
+/* ── Cuentas ──────────────────────────────────────────── */
+.cuenta-row { display: flex; align-items: center; gap: 10px; }
+.cuenta-check { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding: 10px 4px; border-top: 1px solid var(--border); }
+.cuenta-row:first-child .cuenta-check { border-top: none; }
+.cuenta-check > input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--blue); cursor: pointer; }
+.cuenta-nombre { flex: 1; min-width: 0; cursor: text; padding: 2px 4px; border-radius: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background 0.15s; }
+.cuenta-nombre:hover { background: var(--blue-soft); }
+.cuenta-monto { font-size: 14.5px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--text); cursor: text; padding: 2px 6px; border-radius: 3px; white-space: nowrap; transition: background 0.15s; }
+.cuenta-monto:hover { background: var(--blue-soft); }
+.cuenta-row.done .cuenta-nombre, .cuenta-row.done .cuenta-monto { text-decoration: line-through; color: var(--muted2); font-weight: 400; }
+.cuenta-delete { opacity: 0.4; padding: 4px 6px; font-size: 13px; color: var(--muted2); border-radius: 4px; line-height: 1; flex-shrink: 0; transition: opacity 0.15s, color 0.15s, background 0.15s; }
+.cuenta-row:hover .cuenta-delete { opacity: 0.7; }
+.cuenta-delete:hover { opacity: 1; color: var(--red); background: var(--red-soft); }
+.cuenta-edit-input { border: 1px solid var(--blue); border-radius: 4px; padding: 3px 8px; font-size: 14px; font-family: inherit; outline: none; background: white; }
+.cuenta-add-row { display: flex; gap: 8px; margin-top: 12px; }
+.cuenta-add-nombre { flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; background: white; outline: none; transition: border-color 0.15s; }
+.cuenta-add-monto { width: 108px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 14px; background: white; outline: none; text-align: right; font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
+.cuenta-add-nombre:focus, .cuenta-add-monto:focus { border-color: var(--blue); }
+.cuenta-summary { display: flex; gap: 24px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.cs-item { display: flex; flex-direction: column; gap: 3px; }
+.cs-label { font-size: 10.5px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.cs-val { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.cs-val.pend { color: var(--amber-dark); }
+.cs-val.paid { color: var(--green-dark); }
+.cuenta-empty { color: var(--muted2); font-size: 14px; padding: 14px 4px; }
+
 /* ── Icons (inline SVG names) ─────────────────────────── */
 .ic { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; }
 </style>
@@ -432,6 +475,13 @@ a { color: inherit; text-decoration: none; }
       </span>
     </div>
   </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="hoy">Hoy</button>
+    <button class="tab" data-tab="cuentas">Cuentas</button>
+  </nav>
+
+  <div id="tab-hoy" class="tab-panel">
 
   <section class="card" id="agenda-card">
       <div class="card-head">
@@ -489,6 +539,39 @@ a { color: inherit; text-decoration: none; }
       </div>
     </div>
   </section>
+
+  </div><!-- /tab-hoy -->
+
+  <div id="tab-cuentas" class="tab-panel hidden">
+    <section class="card">
+      <div class="card-head">
+        <span class="card-h">
+          <svg class="ic card-h-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/><path d="M21 12H16a2 2 0 0 0 0 4h5v-4z"/></svg>
+          Cuentas
+        </span>
+        <div class="month-nav">
+          <button class="month-btn" id="cuentas-prev" aria-label="Mes anterior">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <span class="month-label" id="cuentas-mes-label">—</span>
+          <button class="month-btn" id="cuentas-next" aria-label="Mes siguiente">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="notes-area">
+        <div id="cuentas-list"></div>
+        <div class="cuenta-add-row">
+          <input type="text" class="cuenta-add-nombre" id="cuenta-add-nombre" placeholder="Nuevo gasto…">
+          <input type="text" inputmode="numeric" class="cuenta-add-monto" id="cuenta-add-monto" placeholder="Monto">
+          <button class="btn-add-note" id="btn-add-cuenta" title="Agregar (Enter)" aria-label="Agregar gasto">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <div class="cuenta-summary" id="cuenta-summary"></div>
+      </div>
+    </section>
+  </div><!-- /tab-cuentas -->
 
 </main>
 
@@ -658,6 +741,13 @@ const CONFIG = {
    MOCK DATA — se reemplaza por las llamadas reales
    ═══════════════════════════════════════════════════════════════ */
 const MOCK_DATA = {
+  cuentas: [
+    { id: 1, nombre: 'Arriendo', monto: 850000, orden: 0 },
+    { id: 2, nombre: 'Luz', monto: 45000, orden: 1 },
+    { id: 3, nombre: 'Internet', monto: 30000, orden: 2 },
+    { id: 4, nombre: 'Gimnasio', monto: 39990, orden: 3 },
+  ],
+  cuentasChecks: {}, // `${id}:${mes}` -> bool
   calendar: [
     { id: 'ev1', start: '09:30', end: '10:15', title: 'Reunión equipo Tantauco', hasNote: false },
     { id: 'ev2', start: '11:00', end: '11:45', title: 'Call con Acme (dealflow)', hasNote: true },
@@ -702,6 +792,30 @@ const api = {
   async createEvent(payload) {
     if (CONFIG.useMockData) { MOCK_DATA.calendar.push({ ...payload, id: 'mock' + Date.now(), hasNote: false }); return; }
     await fetch(`${CONFIG.botApiBase}/dashboard/calendar/event`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  },
+  async loadCuentas(mes) {
+    if (CONFIG.useMockData) {
+      return (MOCK_DATA.cuentas || []).map(c => ({ ...c, pagado: !!MOCK_DATA.cuentasChecks[`${c.id}:${mes}`] }));
+    }
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/cuentas/${mes}`, { headers: authHeaders() });
+    return r.json();
+  },
+  async createCuenta(payload) {
+    if (CONFIG.useMockData) { const item = { id: uid(), pagado: false, orden: 0, ...payload }; MOCK_DATA.cuentas.push(item); return { ok: true, item }; }
+    const r = await fetch(`${CONFIG.botApiBase}/dashboard/cuentas`, { method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    return r.json();
+  },
+  async updateCuenta(id, fields) {
+    if (CONFIG.useMockData) { const c = MOCK_DATA.cuentas.find(x => String(x.id) === String(id)); if (c) Object.assign(c, fields); return { ok: true }; }
+    await fetch(`${CONFIG.botApiBase}/dashboard/cuentas/${id}`, { method: 'PATCH', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
+  },
+  async deleteCuenta(id) {
+    if (CONFIG.useMockData) { MOCK_DATA.cuentas = MOCK_DATA.cuentas.filter(x => String(x.id) !== String(id)); return; }
+    await fetch(`${CONFIG.botApiBase}/dashboard/cuentas/${id}`, { method: 'DELETE', headers: authHeaders() });
+  },
+  async setCuentaCheck(id, mes, pagado) {
+    if (CONFIG.useMockData) { MOCK_DATA.cuentasChecks[`${id}:${mes}`] = pagado; return; }
+    await fetch(`${CONFIG.botApiBase}/dashboard/cuentas/${id}/check/${mes}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ pagado }) });
   },
   async loadActiveNotes() {
     if (CONFIG.useMockData) return MOCK_DATA.dailyNotes || [];
@@ -799,6 +913,9 @@ function uid() { return 'i' + Math.random().toString(36).slice(2, 9); }
    ═══════════════════════════════════════════════════════════════ */
 const state = {
   todayISO: todayISO(),
+  cuentasMes: todayISO().slice(0, 7),
+  cuentas: [],
+  cuentasLoaded: false,
   notes: [],
   notesArchive: [],
   modalEventId: null,
@@ -1229,6 +1346,145 @@ function closePastDailyModal() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   TABS
+   ═══════════════════════════════════════════════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('tab-hoy').classList.toggle('hidden', tab !== 'hoy');
+  document.getElementById('tab-cuentas').classList.toggle('hidden', tab !== 'cuentas');
+  if (tab === 'cuentas' && !state.cuentasLoaded) {
+    state.cuentasLoaded = true;
+    loadCuentas();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUENTAS
+   ═══════════════════════════════════════════════════════════════ */
+function formatMoney(n) { return '$' + (Math.round(Number(n) || 0)).toLocaleString('es-CL'); }
+function parseMoney(s) { const d = String(s).replace(/[^\d]/g, ''); return d ? parseInt(d, 10) : 0; }
+function monthLabel(mesKey) { const [y, m] = mesKey.split('-').map(Number); return `${MONTHS[m - 1]} ${y}`; }
+function shiftMonth(mesKey, delta) {
+  let [y, m] = mesKey.split('-').map(Number);
+  m += delta;
+  while (m < 1) { m += 12; y--; }
+  while (m > 12) { m -= 12; y++; }
+  return `${y}-${String(m).padStart(2, '0')}`;
+}
+
+async function loadCuentas() {
+  try {
+    const items = await api.loadCuentas(state.cuentasMes);
+    state.cuentas = Array.isArray(items) ? items : [];
+  } catch (e) {
+    console.error('loadCuentas error:', e);
+    state.cuentas = [];
+  }
+  renderCuentas();
+}
+function renderCuentas() {
+  document.getElementById('cuentas-mes-label').textContent = monthLabel(state.cuentasMes);
+  const el = document.getElementById('cuentas-list');
+  const delIcon = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+  if (!state.cuentas.length) {
+    el.innerHTML = '<p class="cuenta-empty">Sin gastos este mes. Agrega el primero abajo.</p>';
+  } else {
+    el.innerHTML = state.cuentas.map(c => `
+      <div class="cuenta-row ${c.pagado ? 'done' : ''}" data-id="${escapeAttr(c.id)}">
+        <div class="cuenta-check">
+          <input type="checkbox" ${c.pagado ? 'checked' : ''} data-check-id="${escapeAttr(c.id)}" aria-label="Pagado">
+          <span class="cuenta-nombre" data-name-id="${escapeAttr(c.id)}" title="Click para editar">${escapeHtml(c.nombre)}</span>
+        </div>
+        <span class="cuenta-monto" data-monto-id="${escapeAttr(c.id)}" title="Click para editar">${formatMoney(c.monto)}</span>
+        <button class="cuenta-delete" data-del-id="${escapeAttr(c.id)}" aria-label="Eliminar">${delIcon}</button>
+      </div>
+    `).join('');
+    el.querySelectorAll('[data-check-id]').forEach(i => i.addEventListener('change', () => toggleCuenta(i.dataset.checkId, i.checked)));
+    el.querySelectorAll('[data-name-id]').forEach(s => s.addEventListener('click', () => editCuentaField(s.dataset.nameId, 'nombre', s)));
+    el.querySelectorAll('[data-monto-id]').forEach(s => s.addEventListener('click', () => editCuentaField(s.dataset.montoId, 'monto', s)));
+    el.querySelectorAll('[data-del-id]').forEach(b => b.addEventListener('click', () => deleteCuenta(b.dataset.delId)));
+  }
+  renderCuentaSummary();
+}
+function renderCuentaSummary() {
+  const el = document.getElementById('cuenta-summary');
+  if (!state.cuentas.length) { el.innerHTML = ''; return; }
+  const total = state.cuentas.reduce((s, c) => s + (Number(c.monto) || 0), 0);
+  const paid = state.cuentas.filter(c => c.pagado).reduce((s, c) => s + (Number(c.monto) || 0), 0);
+  el.innerHTML = `
+    <div class="cs-item"><span class="cs-label">Total</span><span class="cs-val">${formatMoney(total)}</span></div>
+    <div class="cs-item"><span class="cs-label">Pagado</span><span class="cs-val paid">${formatMoney(paid)}</span></div>
+    <div class="cs-item"><span class="cs-label">Pendiente</span><span class="cs-val pend">${formatMoney(total - paid)}</span></div>
+  `;
+}
+async function toggleCuenta(id, checked) {
+  const c = state.cuentas.find(x => String(x.id) === String(id));
+  if (!c) return;
+  c.pagado = checked;
+  renderCuentas();
+  await api.setCuentaCheck(id, state.cuentasMes, checked);
+}
+function editCuentaField(id, field, spanEl) {
+  const c = state.cuentas.find(x => String(x.id) === String(id));
+  if (!c) return;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'cuenta-edit-input';
+  if (field === 'monto') {
+    input.value = c.monto ? String(c.monto) : '';
+    input.inputMode = 'numeric';
+    input.style.cssText = 'width:108px; text-align:right;';
+  } else {
+    input.value = c.nombre || '';
+    input.style.cssText = 'flex:1; min-width:0;';
+  }
+  spanEl.replaceWith(input);
+  input.focus();
+  input.select();
+  const save = async () => {
+    if (field === 'monto') {
+      const val = parseMoney(input.value);
+      if (val !== Number(c.monto)) { c.monto = val; await api.updateCuenta(id, { monto: val }); }
+    } else {
+      const val = input.value.trim();
+      if (val && val !== c.nombre) { c.nombre = val; await api.updateCuenta(id, { nombre: val }); }
+    }
+    renderCuentas();
+  };
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { renderCuentas(); }
+  });
+}
+async function deleteCuenta(id) {
+  const c = state.cuentas.find(x => String(x.id) === String(id));
+  if (!c) return;
+  if (!confirm(`¿Eliminar "${c.nombre}"? Se quita de todos los meses.`)) return;
+  state.cuentas = state.cuentas.filter(x => String(x.id) !== String(id));
+  renderCuentas();
+  await api.deleteCuenta(id);
+}
+async function addCuenta() {
+  const nombreEl = document.getElementById('cuenta-add-nombre');
+  const montoEl = document.getElementById('cuenta-add-monto');
+  const nombre = nombreEl.value.trim();
+  if (!nombre) { nombreEl.focus(); return; }
+  const monto = parseMoney(montoEl.value);
+  const orden = state.cuentas.length;
+  const r = await api.createCuenta({ nombre, monto, orden });
+  const item = r?.item || { id: uid(), nombre, monto, orden };
+  item.pagado = false;
+  state.cuentas.push(item);
+  nombreEl.value = '';
+  montoEl.value = '';
+  renderCuentas();
+  nombreEl.focus();
+}
+function cuentasPrevMonth() { state.cuentasMes = shiftMonth(state.cuentasMes, -1); loadCuentas(); }
+function cuentasNextMonth() { state.cuentasMes = shiftMonth(state.cuentasMes, 1); loadCuentas(); }
+
+/* ═══════════════════════════════════════════════════════════════
    ESCAPE HTML
    ═══════════════════════════════════════════════════════════════ */
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -1261,6 +1517,16 @@ async function init() {
   noteInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCurrentNote(); } });
   document.getElementById('btn-add-note').addEventListener('click', addCurrentNote);
   document.getElementById('btn-add-longform').addEventListener('click', createLongformNote);
+
+  // Tabs (Hoy / Cuentas)
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+  // Cuentas
+  document.getElementById('cuentas-prev').addEventListener('click', cuentasPrevMonth);
+  document.getElementById('cuentas-next').addEventListener('click', cuentasNextMonth);
+  document.getElementById('btn-add-cuenta').addEventListener('click', addCuenta);
+  document.getElementById('cuenta-add-nombre').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('cuenta-add-monto').focus(); } });
+  document.getElementById('cuenta-add-monto').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCuenta(); } });
   document.getElementById('modal-longform-title').addEventListener('input', saveLongformDebounced);
   document.getElementById('modal-longform-body').addEventListener('input', saveLongformDebounced);
   document.getElementById('btn-delete-longform').addEventListener('click', deleteCurrentLongform);
