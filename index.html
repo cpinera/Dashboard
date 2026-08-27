@@ -817,6 +817,10 @@ const api = {
     if (CONFIG.useMockData) { MOCK_DATA.cuentasChecks[`${id}:${mes}`] = pagado; return; }
     await fetch(`${CONFIG.botApiBase}/dashboard/cuentas/${id}/check/${mes}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ pagado }) });
   },
+  async setCuentaMonto(id, mes, monto) {
+    if (CONFIG.useMockData) { const c = MOCK_DATA.cuentas.find(x => String(x.id) === String(id)); if (c) c.monto = monto; return; }
+    await fetch(`${CONFIG.botApiBase}/dashboard/cuentas/${id}/monto/${mes}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ monto }) });
+  },
   async loadActiveNotes() {
     if (CONFIG.useMockData) return MOCK_DATA.dailyNotes || [];
     const r = await fetch(`${CONFIG.botApiBase}/dashboard/note-items/active`, { headers: authHeaders() });
@@ -1444,7 +1448,7 @@ function editCuentaField(id, field, spanEl) {
   const save = async () => {
     if (field === 'monto') {
       const val = parseMoney(input.value);
-      if (val !== Number(c.monto)) { c.monto = val; await api.updateCuenta(id, { monto: val }); }
+      if (val !== Number(c.monto)) { c.monto = val; await api.setCuentaMonto(id, state.cuentasMes, val); }
     } else {
       const val = input.value.trim();
       if (val && val !== c.nombre) { c.nombre = val; await api.updateCuenta(id, { nombre: val }); }
